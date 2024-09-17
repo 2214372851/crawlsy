@@ -1,0 +1,150 @@
+[
+  {
+    "model": "User.MenuModel",
+    "pk": 1,
+    "fields": {
+      "name": "首页",
+      "icon": "Home",
+      "path": "home",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 2,
+    "fields": {
+      "name": "用户管理",
+      "icon": "User",
+      "path": "user",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 3,
+    "fields": {
+      "name": "角色管理",
+      "icon": "Role",
+      "path": "role",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 4,
+    "fields": {
+      "name": "菜单管理",
+      "icon": "Menu",
+      "path": "menu",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 5,
+    "fields": {
+      "name": "权限管理",
+      "icon": "Permission",
+      "path": "permission",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.PermissionModel",
+    "pk": 1,
+    "fields": {
+      "name": "用户列表",
+      "method": "GET",
+      "path": "user-list",
+      "menu": 2,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.PermissionModel",
+    "pk": 2,
+    "fields": {
+      "name": "用户新增",
+      "method": "POST",
+      "path": "user-list",
+      "menu": 2,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.PermissionModel",
+    "pk": 3,
+    "fields": {
+      "name": "用户详情",
+      "method": "GET",
+      "path": "user-detail",
+      "menu": 2,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.PermissionModel",
+    "pk": 4,
+    "fields": {
+      "name": "用户删除",
+      "method": "DELETE",
+      "path": "user-detail",
+      "menu": 2,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.PermissionModel",
+    "pk": 5,
+    "fields": {
+      "name": "用户修改",
+      "method": "PUT",
+      "path": "user-detail",
+      "menu": 2,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.RoleModel",
+    "pk": 1,
+    "fields": {
+      "name": "管理员",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z",
+      "permissions": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "User.UserModel",
+    "pk": 1,
+    "fields": {
+      "uid": "109cd8415dfa4f69aa6c2d7e9f73c383",
+      "username": "超级管理员",
+      "password": "pbkdf2_sha1$600000$8o04rGew7ySowiFFQTFbDH$NGvaKb8i23s3p+OXYaSvF/wSez4=",
+      "email": "bybxbwg@foxmail.com",
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z",
+      "status": true,
+      "lastLoginTime": "2024-07-07T06:08:03.000Z",
+      "role": [
+        1
+      ]
+    }
+  }
+]

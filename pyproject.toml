@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "spidermanage"
+version = "0.1.0"
+description = ""
+authors = ["yunhai <bybxbwg@foxmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "4.2.1"
+django-cors-headers = "3.14.0"
+django-redis = "5.2.0"
+djangorestframework = "3.14.0"
+drf-yasg = "1.21.7"
+PyJWT = "2.6.0"
+redis = "4.5.5"
+
+celery = "^5.4.0"
+requests = "^2.32.3"
+croniter = "^3.0.3"
+pymysql = "^1.1.1"
+
+[tool.poetry.extras]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+priority = "primary"
