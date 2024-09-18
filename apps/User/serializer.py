@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     createTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     updateTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    role = serializers.PrimaryKeyRelatedField(many=True, queryset=RoleModel.objects, required=True)
+    role = serializers.PrimaryKeyRelatedField(many=True, queryset=RoleModel.objects)
     password = serializers.CharField(write_only=True)
 
     def validate_username(self, value):
