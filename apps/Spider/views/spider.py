@@ -41,9 +41,9 @@ class SpiderViewSet(CustomModelViewSet):
                 type=openapi.TYPE_STRING
             ),
             openapi.Parameter(
-                'nodeUid',
+                'spiderUid',
                 openapi.IN_QUERY,
-                description='节点ID搜索',
+                description='爬虫ID搜索',
                 type=openapi.TYPE_STRING
             ),
             openapi.Parameter(
@@ -211,6 +211,10 @@ class SpiderViewSet(CustomModelViewSet):
     def update(self, request, *args, **kwargs):
         if 'founder' in request.data:
             del request.data['founder']
+        if 'spiderUid' in request.data:
+            del request.data['spiderUid']
+        if 'resources' in request.data:
+            del request.data['resources']
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -236,11 +240,11 @@ class SpiderViewSet(CustomModelViewSet):
         filter_data = queryset
         name = self.request.query_params.get('name', None)
         founder = self.request.query_params.get('founder', None)
-        nodeUid = self.request.query_params.get('nodeUid', None)
+        spiderUid = self.request.query_params.get('spiderUid', None)
         status = self.request.query_params.get('status', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
         if founder: filter_data = filter_data.filter(founder__username__icontains=name)
-        if nodeUid: filter_data = filter_data.filter(nodeUid=nodeUid)
+        if spiderUid: filter_data = filter_data.filter(spiderUid=spiderUid)
         if status: filter_data = filter_data.filter(status=status == 'true')
         return filter_data
 

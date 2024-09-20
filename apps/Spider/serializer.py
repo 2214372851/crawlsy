@@ -19,5 +19,4 @@ class SpiderSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'founder': {'write_only': True},
-            'status': {'read_only': True},
         }
