@@ -101,7 +101,9 @@ class PermissionViewSet(CustomModelViewSet):
     def filter_queryset(self, queryset):
         filter_data = queryset
         name = self.request.query_params.get('name', None)
+        method = self.request.query_params.get('method', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
+        if method: filter_data = filter_data.filter(method=method)
         return filter_data
 
 
