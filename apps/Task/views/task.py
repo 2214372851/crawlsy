@@ -317,7 +317,7 @@ class TaskViewSet(CustomModelViewSet):
         status = self.request.query_params.get('status', None)
         isTiming = self.request.query_params.get('isTiming', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
-        if founder: filter_data = filter_data.filter(founder__username__icontains=name)
+        if founder: filter_data = filter_data.filter(founder__username__icontains=founder)
         if status: filter_data = filter_data.filter(status=status == 'true')
         if isTiming: filter_data = filter_data.filter(isTiming=isTiming == 'true')
         return filter_data
