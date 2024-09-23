@@ -243,7 +243,7 @@ class SpiderViewSet(CustomModelViewSet):
         spiderUid = self.request.query_params.get('spiderUid', None)
         status = self.request.query_params.get('status', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
-        if founder: filter_data = filter_data.filter(founder__username__icontains=name)
+        if founder: filter_data = filter_data.filter(founder__username__icontains=founder)
         if spiderUid: filter_data = filter_data.filter(spiderUid=spiderUid)
         if status: filter_data = filter_data.filter(status=status == 'true')
         return filter_data
