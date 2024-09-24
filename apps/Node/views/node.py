@@ -199,6 +199,7 @@ class NodeViewSet(CustomModelViewSet):
         }
     )
     def destroy(self, request, *args, **kwargs):
+        # TODO：删除节点前，检查节点下是否有任务
         return super().destroy(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):
