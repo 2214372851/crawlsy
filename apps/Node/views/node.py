@@ -139,6 +139,7 @@ class NodeViewSet(CustomModelViewSet):
         }
     )
     def create(self, request, *args, **kwargs):
+        # TODO: 检查节点可用性
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
