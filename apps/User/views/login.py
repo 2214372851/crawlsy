@@ -77,6 +77,7 @@ class LoginView(APIView):
                 'refreshToken': refresh_token,
                 'lastLoginTime': user.lastLoginTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'username': user.username,
+                'email': user.email,
                 'permissions': permissions,
                 'menus': menus.values(),
                 'role': user.role.all().values('id', 'name')
