@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     def validate_username(self, value):
-        if not 30 > len(value) > 2:
+        if not 30 > len(value) > 1:
             raise serializers.ValidationError('用户名长度必须在2到30个字符之间')
 
         if not is_username(value):
