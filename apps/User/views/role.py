@@ -3,7 +3,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import routers
 from rest_framework.views import Request
 
-from utils.viewset import CustomModelViewSet
+from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
 from ..models import RoleModel
 from ..serializer import RoleSerializer
 
@@ -103,5 +103,37 @@ class RoleViewSet(CustomModelViewSet):
         return filter_data
 
 
+class RoleOptionViewSet(CustomGenericViewSet, CustomListMixin):
+    """
+    角色视图集
+    """
+    queryset = RoleModel.objects.all()
+    serializer_class = RoleSerializer
+    lookup_field = 'id'
+
+    @swagger_auto_schema(
+        operation_summary='角色选项列表',
+        operation_description='角色选项列表',
+        manual_parameters=[
+            openapi.Parameter(
+                'name',
+                openapi.IN_QUERY,
+                description='角色名称模糊搜索',
+                type=openapi.TYPE_STRING
+            ),
+        ],
+        tags=['角色管理'],
+    )
+    def list(self, request: Request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        filter_data = queryset
+        name = self.request.query_params.get('name', None)
+        if name: filter_data = filter_data.filter(name__icontains=name)
+        return filter_data
+
+
 router = routers.DefaultRouter()
 router.register('role', RoleViewSet, basename='role')
+router.register('roleOption', RoleOptionViewSet, basename='role-option')

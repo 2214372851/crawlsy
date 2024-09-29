@@ -9,7 +9,7 @@ from rest_framework.views import Request
 
 from apps.Node.models import NodeModel
 from apps.Node.serializer import NodeSerializer
-from utils.viewset import CustomModelViewSet
+from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
 
 
 class NodeViewSet(CustomModelViewSet):
@@ -213,5 +213,53 @@ class NodeViewSet(CustomModelViewSet):
         return filter_data
 
 
+class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
+    queryset = NodeModel.objects.all()
+    serializer_class = NodeSerializer
+    lookup_field = 'id'
+
+    @swagger_auto_schema(
+        operation_summary='节点选项列表',
+        operation_description='节点选项列表',
+        manual_parameters=[
+            openapi.Parameter(
+                'name',
+                openapi.IN_QUERY,
+                description='节点名称模糊搜索',
+                type=openapi.TYPE_STRING
+            ),
+        ],
+        tags=['节点管理'],
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": {
+                            "total": 1,
+                            "list": [
+                                {
+                                    "id": 2,
+                                    "name": "测试节点1"
+                                }
+                            ]
+                        }
+                    }
+                })
+        }
+    )
+    def list(self, request: Request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        filter_data = queryset
+        name = self.request.query_params.get('name', None)
+        if name: filter_data = filter_data.filter(name__icontains=name)
+        return filter_data
+
+
 router = routers.DefaultRouter()
 router.register('node', NodeViewSet, basename='node')
+router.register('nodeOption', NodeOptionViewSet, basename='node-option')

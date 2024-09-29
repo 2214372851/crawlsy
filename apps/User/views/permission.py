@@ -3,9 +3,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import routers
 from rest_framework.views import Request
 
-from utils.viewset import CustomModelViewSet
+from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
 from ..models import PermissionModel
-from ..serializer import PermissionSerializer
+from ..serializer import PermissionSerializer, PermissionOptionSerializer
 
 
 class PermissionViewSet(CustomModelViewSet):
@@ -106,6 +106,34 @@ class PermissionViewSet(CustomModelViewSet):
         if method: filter_data = filter_data.filter(method=method)
         return filter_data
 
+class PermissionOptionViewSet(CustomGenericViewSet, CustomListMixin):
+    queryset = PermissionModel.objects.all()
+    serializer_class = PermissionOptionSerializer
+    lookup_field = 'id'
+
+    @swagger_auto_schema(
+        operation_summary='权限选项列表',
+        operation_description='权限选项列表',
+        manual_parameters=[
+            openapi.Parameter(
+                'name',
+                openapi.IN_QUERY,
+                description='权限名称模糊搜索',
+                type=openapi.TYPE_STRING
+            ),
+        ],
+        tags=['权限管理'],
+    )
+    def list(self, request: Request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def filter_queryset(self, queryset):
+        filter_data = queryset
+        name = self.request.query_params.get('name', None)
+        if name: filter_data = filter_data.filter(name__icontains=name)
+        return filter_data
+
 
 router = routers.DefaultRouter()
 router.register('permission', PermissionViewSet, basename='permission')
+router.register('permissionOption', PermissionOptionViewSet, basename='permission-option')

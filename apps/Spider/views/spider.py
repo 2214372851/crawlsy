@@ -9,8 +9,8 @@ from rest_framework import routers
 from rest_framework.views import Request
 
 from apps.Spider.models import SpiderModel
-from apps.Spider.serializer import SpiderSerializer
-from utils.viewset import CustomModelViewSet
+from apps.Spider.serializer import SpiderSerializer, SpiderOptionSerializer
+from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
 
 
 class SpiderViewSet(CustomModelViewSet):
@@ -249,5 +249,53 @@ class SpiderViewSet(CustomModelViewSet):
         return filter_data
 
 
+class SpiderOptionViewSet(CustomGenericViewSet, CustomListMixin):
+    queryset = SpiderModel.objects.all()
+    serializer_class = SpiderOptionSerializer
+    lookup_field = 'id'
+
+    @swagger_auto_schema(
+        operation_summary='爬虫选项列表',
+        operation_description='爬虫选项列表',
+        manual_parameters=[
+            openapi.Parameter(
+                'name',
+                openapi.IN_QUERY,
+                description='爬虫名称模糊搜索',
+                type=openapi.TYPE_STRING
+            ),
+        ],
+        tags=['爬虫管理'],
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": {
+                            "total": 1,
+                            "list": [
+                                {
+                                    "id": 1,
+                                    "name": "测试爬虫",
+                                }
+                            ]
+                        }
+                    }
+                })
+        }
+    )
+    def list(self, request: Request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        filter_data = queryset
+        name = self.request.query_params.get('name', None)
+        if name: filter_data = filter_data.filter(name__icontains=name)
+        return filter_data
+
+
 router = routers.DefaultRouter()
 router.register('spider', SpiderViewSet, basename='spider')
+router.register('spiderOption', SpiderOptionViewSet, basename='spider-option')

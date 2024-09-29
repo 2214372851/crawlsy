@@ -92,3 +92,33 @@ class MenuSerializer(serializers.ModelSerializer):
         model = MenuModel
         fields = '__all__'
         read_only_fields = ('id',)
+
+
+class MenuOptionSerializer(serializers.ModelSerializer):
+    """
+    菜单选项序列化器
+    """
+
+    class Meta:
+        model = MenuModel
+        fields = ('id', 'name')
+
+
+class RoleOptionSerializer(serializers.ModelSerializer):
+    """
+    角色选项序列化器
+    """
+
+    class Meta:
+        model = RoleModel
+        fields = ('id', 'name')
+
+
+class PermissionOptionSerializer(serializers.ModelSerializer):
+    """
+    角色选项序列化器
+    """
+
+    class Meta:
+        model = PermissionModel
+        fields = ('id', 'name')

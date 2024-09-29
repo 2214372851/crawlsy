@@ -3,9 +3,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import routers
 from rest_framework.views import Request
 
-from utils.viewset import CustomModelViewSet
+from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
 from ..models import MenuModel
-from ..serializer import MenuSerializer
+from ..serializer import MenuSerializer, MenuOptionSerializer
 
 
 class MenuViewSet(CustomModelViewSet):
@@ -104,5 +104,34 @@ class MenuViewSet(CustomModelViewSet):
         return filter_data
 
 
+class MenuOptionViewSet(CustomGenericViewSet, CustomListMixin):
+    queryset = MenuModel.objects.all()
+    serializer_class = MenuOptionSerializer
+    lookup_field = 'id'
+
+    @swagger_auto_schema(
+        operation_summary='菜单选项列表',
+        operation_description='菜单选项列表',
+        manual_parameters=[
+            openapi.Parameter(
+                'name',
+                openapi.IN_QUERY,
+                description='菜单名称模糊搜索',
+                type=openapi.TYPE_STRING
+            ),
+        ],
+        tags=['菜单管理'],
+    )
+    def list(self, request: Request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        filter_data = queryset
+        name = self.request.query_params.get('name', None)
+        if name: filter_data = filter_data.filter(name__icontains=name)
+        return filter_data
+
+
 router = routers.DefaultRouter()
 router.register('menu', MenuViewSet, basename='menu')
+router.register('menuOption', MenuOptionViewSet, basename='menu-option')

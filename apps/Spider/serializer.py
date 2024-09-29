@@ -21,3 +21,9 @@ class SpiderSerializer(serializers.ModelSerializer):
             'founder': {'write_only': True},
             'resources': {'write_only': True},
         }
+
+
+class SpiderOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpiderModel
+        fields = ('id', 'name')

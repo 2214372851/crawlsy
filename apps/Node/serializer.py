@@ -20,3 +20,13 @@ class NodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = NodeModel
         fields = '__all__'
+
+
+class NodeOptionSerializer(serializers.ModelSerializer):
+    """
+    节点选项序列化器
+    """
+
+    class Meta:
+        model = NodeModel
+        fields = ('id', 'name')
