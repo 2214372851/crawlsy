@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.Node',
     'apps.Task',
     'apps.Spider',
+    'apps.Ide',
 ]
 
 MIDDLEWARE = [
@@ -263,3 +264,6 @@ LOGGING = {
         }
     },
 }
+
+# Ide resources
+IDE_RESOURCES = Path('/data/spider_project')

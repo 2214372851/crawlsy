@@ -1,19 +1,24 @@
-from jwt.exceptions import ExpiredSignatureError
-from rest_framework.views import exception_handler
-from utils.response import CustomResponse
-from utils.code import Code
+import logging
+
+from django.db.models import ProtectedError
 from django.db.utils import IntegrityError
-from rest_framework.exceptions import (AuthenticationFailed, MethodNotAllowed, NotAuthenticated,
+from jwt.exceptions import ExpiredSignatureError
+from rest_framework.exceptions import (AuthenticationFailed, NotAuthenticated,
                                        PermissionDenied as RestPermissionDenied,
                                        ValidationError)
-import logging
+from rest_framework.views import exception_handler
+
+from utils.code import Code
+from utils.response import CustomResponse
 
 logger = logging.getLogger('django')
 
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
-    logger.error(str(exc), str(context))
+    print(exc)
+    logger.error(str(exc), str(context), exc_info=True)
+    print(type(exc))
     if isinstance(exc, (NotAuthenticated, AuthenticationFailed)):
         return CustomResponse(
             code=Code.UNAUTHENTICATED,
@@ -34,6 +39,12 @@ def custom_exception_handler(exc, context):
         return CustomResponse(
             code=Code.INVALID_ARGUMENT,
             msg='身份信息失效',
+        )
+    if isinstance(exc, ProtectedError):
+        return CustomResponse(
+            code=Code.FAILED_PRECONDITION,
+            msg='数据被使用中无法操作',
+            data={'error': str(exc)},
         )
     if isinstance(exc, IntegrityError):
         return CustomResponse(

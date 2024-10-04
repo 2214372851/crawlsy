@@ -50,4 +50,5 @@ urlpatterns = [
     path('api/V1/', include('apps.Node.urls')),
     path('api/V1/', include('apps.Task.urls')),
     path('api/V1/', include('apps.Spider.urls')),
+    path('api/V1/', include('apps.Ide.urls')),
 ]

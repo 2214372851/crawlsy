@@ -1,3 +1,4 @@
+from pathlib import Path
 from uuid import uuid4
 
 from django.db import models
@@ -19,5 +20,6 @@ class SpiderModel(models.Model):
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
     def delete(self, using=None, keep_parents=False):
-        shutil.rmtree(self.resources)
+        if Path(self.resources).exists():
+            shutil.rmtree(self.resources)
         return super().delete(using, keep_parents)

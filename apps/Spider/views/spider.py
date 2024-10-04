@@ -11,6 +11,7 @@ from rest_framework.views import Request
 from apps.Spider.models import SpiderModel
 from apps.Spider.serializer import SpiderSerializer, SpiderOptionSerializer
 from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
+from django.conf import settings
 
 
 class SpiderViewSet(CustomModelViewSet):
@@ -161,7 +162,9 @@ class SpiderViewSet(CustomModelViewSet):
         spider_uid = uuid4()
         request.data['spiderUid'] = spider_uid
         # TODO: 为爬虫创建项目文件夹
-        request.data['resources'] = "/data/spider_project/{}".format(spider_uid)
+        resources = settings.IDE_RESOURCES / str(spider_uid)
+        resources.mkdir(parents=True)
+        request.data['resources'] = str(resources)
         # request.data['founder'] = request.user.uid
         return super().create(request, *args, **kwargs)
 
@@ -233,7 +236,6 @@ class SpiderViewSet(CustomModelViewSet):
         }
     )
     def destroy(self, request, *args, **kwargs):
-        # TODO: 移除爬虫项目文件夹
         return super().destroy(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):
