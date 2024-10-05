@@ -25,3 +25,7 @@ def is_text_file_chardet(file_path: Path):
 
 def is_text_file(file_path: Path):
     return is_text_file_mimetypes(file_path) or is_text_file_chardet(file_path)
+
+
+def is_valid_filename(filename: str):
+    return bool(filename) and not any(c in filename for c in '\\/:*?"<>|')

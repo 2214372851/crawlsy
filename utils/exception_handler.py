@@ -46,6 +46,12 @@ def custom_exception_handler(exc, context):
             msg='数据被使用中无法操作',
             data={'error': str(exc)},
         )
+    if isinstance(exc, FileNotFoundError):
+        return CustomResponse(
+            code=Code.NOT_FOUND,
+            msg='资源不存在',
+            data={'error': str(exc)},
+        )
     if isinstance(exc, IntegrityError):
         return CustomResponse(
             code=Code.DATA_LOSS,
