@@ -279,6 +279,11 @@ class IdeFileView(APIView):
                 code=Code.INVALID_ARGUMENT,
                 msg="文件类型不支持"
             )
+        if resource_path.stat().st_size > settings.IDE_MAX_FILE_SIZE:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg="文件过大"
+            )
         return CustomResponse(
             code=Code.OK,
             msg="Success",
@@ -311,7 +316,7 @@ class IdeFileView(APIView):
                 code=Code.INVALID_ARGUMENT,
                 msg="文件类型不支持"
             )
-        resource_path.write_text(content, encoding='utf-8')
+        resource_path.write_text(content.replace('\r\n', '\n'), encoding='utf-8')
         return CustomResponse(
             code=Code.OK,
             msg="Success"

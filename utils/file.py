@@ -4,6 +4,10 @@ import chardet
 import mimetypes
 
 
+def is_text_file_suffix(file_path: Path):
+    return file_path.suffix in ['.txt', '.md', '.py', '.js', '.html', '.go', '.rs', '.ts']
+
+
 def is_text_file_mimetypes(file_path: Path):
     mime_type, _ = mimetypes.guess_type(file_path)
     return mime_type is not None and mime_type.startswith('text')
@@ -24,7 +28,7 @@ def is_text_file_chardet(file_path: Path):
 
 
 def is_text_file(file_path: Path):
-    return is_text_file_mimetypes(file_path) or is_text_file_chardet(file_path)
+    return is_text_file_suffix(file_path) or is_text_file_mimetypes(file_path) or is_text_file_chardet(file_path)
 
 
 def is_valid_filename(filename: str):

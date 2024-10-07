@@ -267,3 +267,4 @@ LOGGING = {
 
 # Ide resources
 IDE_RESOURCES = Path('/data/spider_project')
+IDE_MAX_FILE_SIZE = 1024 * 1024 * 10
