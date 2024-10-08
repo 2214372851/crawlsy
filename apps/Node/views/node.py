@@ -217,6 +217,7 @@ class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
     queryset = NodeModel.objects.all()
     serializer_class = NodeSerializer
     lookup_field = 'id'
+    pagination_class = None
 
     @swagger_auto_schema(
         operation_summary='节点选项列表',

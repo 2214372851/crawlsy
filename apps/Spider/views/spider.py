@@ -9,8 +9,8 @@ from rest_framework import routers
 from rest_framework.views import Request
 
 from apps.Spider.models import SpiderModel
-from apps.Spider.serializer import SpiderSerializer, SpiderOptionSerializer
-from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
+from apps.Spider.serializer import SpiderSerializer, SpiderOptionSerializer, SpiderTaskSerializer
+from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin, CustomRetrieveMixin
 from django.conf import settings
 
 
@@ -255,6 +255,7 @@ class SpiderOptionViewSet(CustomGenericViewSet, CustomListMixin):
     queryset = SpiderModel.objects.all()
     serializer_class = SpiderOptionSerializer
     lookup_field = 'id'
+    pagination_class = None
 
     @swagger_auto_schema(
         operation_summary='爬虫选项列表',
@@ -298,6 +299,32 @@ class SpiderOptionViewSet(CustomGenericViewSet, CustomListMixin):
         return filter_data
 
 
+class SpiderTaskViewSet(CustomGenericViewSet, CustomRetrieveMixin):
+    queryset = SpiderModel.objects.all()
+    serializer_class = SpiderTaskSerializer
+    lookup_field = 'id'
+    pagination_class = None
+
+    @swagger_auto_schema(
+        operation_summary='爬虫任务列表',
+        operation_description='爬虫任务列表',
+        manual_parameters=[],
+        tags=['爬虫管理'],
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={}
+            )
+        }
+    )
+    def retrieve(self, request: Request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        return queryset
+
+
 router = routers.DefaultRouter()
 router.register('spider', SpiderViewSet, basename='spider')
+router.register('spiderTask', SpiderTaskViewSet, basename='spider-task')
 router.register('spiderOption', SpiderOptionViewSet, basename='spider-option')

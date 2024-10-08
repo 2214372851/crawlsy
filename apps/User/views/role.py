@@ -110,6 +110,7 @@ class RoleOptionViewSet(CustomGenericViewSet, CustomListMixin):
     queryset = RoleModel.objects.all()
     serializer_class = RoleSerializer
     lookup_field = 'id'
+    pagination_class = None
 
     @swagger_auto_schema(
         operation_summary='角色选项列表',

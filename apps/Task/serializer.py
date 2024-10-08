@@ -39,7 +39,6 @@ class TaskSerializers(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {'cronExpression': 'cron表达式不符合规范'})
         return attrs
-    
 
     class Meta:
         model = TaskModel
@@ -48,3 +47,13 @@ class TaskSerializers(serializers.ModelSerializer):
             'founder': {'write_only': True},
             'status': {'read_only': True},
         }
+
+
+# spider反查询序列化器
+class TaskRelatedSerializers(TaskSerializers):
+    """
+    任务反查询序列化器
+    """
+    class Meta:
+        model = TaskModel
+        fields = ('id', 'name', 'status', 'isTiming', 'founderUser', 'createTime', 'updateTime')

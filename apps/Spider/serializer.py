@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.Spider.models import SpiderModel
+from apps.Task.serializer import TaskRelatedSerializers
 
 
 class SpiderSerializer(serializers.ModelSerializer):
@@ -21,6 +22,10 @@ class SpiderSerializer(serializers.ModelSerializer):
             'founder': {'write_only': True},
             'resources': {'write_only': True},
         }
+
+
+class SpiderTaskSerializer(SpiderSerializer):
+    taskmodel_set = TaskRelatedSerializers(read_only=True, many=True)
 
 
 class SpiderOptionSerializer(serializers.ModelSerializer):

@@ -108,6 +108,7 @@ class MenuOptionViewSet(CustomGenericViewSet, CustomListMixin):
     queryset = MenuModel.objects.all()
     serializer_class = MenuOptionSerializer
     lookup_field = 'id'
+    pagination_class = None
 
     @swagger_auto_schema(
         operation_summary='菜单选项列表',

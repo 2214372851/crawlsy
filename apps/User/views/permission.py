@@ -106,10 +106,12 @@ class PermissionViewSet(CustomModelViewSet):
         if method: filter_data = filter_data.filter(method=method)
         return filter_data
 
+
 class PermissionOptionViewSet(CustomGenericViewSet, CustomListMixin):
     queryset = PermissionModel.objects.all()
     serializer_class = PermissionOptionSerializer
     lookup_field = 'id'
+    pagination_class = None
 
     @swagger_auto_schema(
         operation_summary='权限选项列表',
@@ -126,7 +128,7 @@ class PermissionOptionViewSet(CustomGenericViewSet, CustomListMixin):
     )
     def list(self, request: Request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+
     def filter_queryset(self, queryset):
         filter_data = queryset
         name = self.request.query_params.get('name', None)
