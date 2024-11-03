@@ -89,7 +89,10 @@ class CustomListMixin:
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse(
-            data=serializer.data,
+            data={
+                'total': queryset.count(),
+                'list': serializer.data
+            },
             msg='Success',
             code=Code.OK)
 

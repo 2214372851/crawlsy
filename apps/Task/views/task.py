@@ -9,7 +9,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import routers
 from rest_framework.views import Request
 from apps.Task.models import TaskModel
-from apps.Task.serializer import TaskSerializers
+from apps.Task.serializer import TaskSerializers, TaskDetailSerializers
+from utils.code import Code
+from utils.response import CustomResponse
 from utils.viewset import CustomModelViewSet
 
 
@@ -148,7 +150,11 @@ class TaskViewSet(CustomModelViewSet):
         }
     )
     def retrieve(self, request: Request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_object()
+        if not instance: return CustomResponse(code=Code.NOT_FOUND, msg='未找到该资源')
+        serializer = TaskDetailSerializers(instance)
+        self.check_object_permissions(request, serializer)
+        return CustomResponse(code=Code.OK, msg='Success', data=serializer.data)
 
     @swagger_auto_schema(
         operation_summary='创建任务',

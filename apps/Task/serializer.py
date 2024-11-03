@@ -54,6 +54,22 @@ class TaskRelatedSerializers(TaskSerializers):
     """
     任务反查询序列化器
     """
+
     class Meta:
         model = TaskModel
         fields = ('id', 'name', 'status', 'isTiming', 'founderUser', 'createTime', 'updateTime')
+
+
+class TaskDetailSerializers(TaskSerializers):
+    """
+    任务详情序列化器
+    """
+    taskNodes = serializers.SerializerMethodField(read_only=True)
+
+    def get_taskNodes(self, obj: TaskModel):
+        return [{
+            'id': node.id,
+            'name': node.name,
+            'nodeUid': node.nodeUid,
+            'status': node.status
+        } for node in obj.taskNodes.all()]

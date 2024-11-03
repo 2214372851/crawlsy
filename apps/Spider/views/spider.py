@@ -296,6 +296,7 @@ class SpiderOptionViewSet(CustomGenericViewSet, CustomListMixin):
         filter_data = queryset
         name = self.request.query_params.get('name', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
+        filter_data = filter_data.filter(status=True)
         return filter_data
 
 

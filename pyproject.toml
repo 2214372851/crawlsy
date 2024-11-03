@@ -20,6 +20,7 @@ requests = "^2.32.3"
 croniter = "^3.0.3"
 pymysql = "^1.1.1"
 chardet = "^5.2.0"
+eventlet = "^0.37.0"
 
 [tool.poetry.extras]
 

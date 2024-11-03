@@ -76,7 +76,15 @@ def refresh_access_token(token):
 
 def remove_token(token):
     if not token: raise NotAuthenticated(detail='未携带身份信息')
-    payload = jwt.decode(token, settings.SECRET_KEY, issuer=settings.TOKEN_ISS, algorithms=['HS256'])
+    payload = jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        issuer=settings.TOKEN_ISS,
+        algorithms=['HS256'],
+        options={
+            'verify_exp': False
+        }
+    )
     uid = payload.get('data', {}).get('uid', None)
     access_cache = caches['access_token']
     refresh_cache = caches['refresh_token']

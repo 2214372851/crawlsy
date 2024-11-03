@@ -153,13 +153,6 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
-    },
-    "node_detection": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:redis_pCd7ts@8.153.17.121:6379/3",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
     }
 }
 
@@ -268,3 +261,10 @@ LOGGING = {
 # Ide resources
 IDE_RESOURCES = Path('/data/spider_project')
 IDE_MAX_FILE_SIZE = 1024 * 1024 * 10
+
+# Celery
+CELERY_BROKER_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/5'
+CELERY_RESULT_BACKEND = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
+
+# Node Service
+NODE_SERVICE_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/3'

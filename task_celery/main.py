@@ -1,4 +1,6 @@
 import os
+
+import django
 from celery import Celery
 from pathlib import Path
 import sys
@@ -12,7 +14,8 @@ app = Celery('django_celery')
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'spiderManage.settings')
 
-app.config_from_object('task_celery.config')
+django.setup()
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks([
     'task_celery.node_status'
