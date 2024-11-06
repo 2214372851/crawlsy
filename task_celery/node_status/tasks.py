@@ -2,7 +2,6 @@ from apps.Node.models import NodeModel
 from django.conf import settings
 import redis
 from celery import shared_task
-from task_celery.main import app as celery_app
 
 
 @shared_task

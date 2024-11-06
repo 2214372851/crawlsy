@@ -135,4 +135,4 @@ class MenuOptionViewSet(CustomGenericViewSet, CustomListMixin):
 
 router = routers.DefaultRouter()
 router.register('menu', MenuViewSet, basename='menu')
-router.register('menuOption', MenuOptionViewSet, basename='menu-option')
+router.register('menu-option', MenuOptionViewSet, basename='menu-option')

@@ -138,4 +138,4 @@ class PermissionOptionViewSet(CustomGenericViewSet, CustomListMixin):
 
 router = routers.DefaultRouter()
 router.register('permission', PermissionViewSet, basename='permission')
-router.register('permissionOption', PermissionOptionViewSet, basename='permission-option')
+router.register('permission-option', PermissionOptionViewSet, basename='permission-option')

@@ -1,12 +1,14 @@
-from django_redis import get_redis_connection
+import json
+
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
-from utils.code import Code
-from utils.response import CustomResponse
 from apps.Node.models import NodeModel
+from utils.code import Code
+from utils.node_stat import get_node_conn
+from utils.response import CustomResponse
 
 
 class SearchNodeView(APIView):
@@ -33,17 +35,23 @@ class SearchNodeView(APIView):
         }
     )
     def get(self, request: Request):
-        # TODO: 等待子节点模块完成
         exclude_nodes = {node.nodeUid for node in NodeModel.objects.all()}
-        conn = get_redis_connection('node_detection')
+        conn = get_node_conn()
         search_nodes = []
-        for key in conn.scan_iter():
+        for key in conn.keys('*_stat'):
             key: bytes
             node_key = key.decode('utf-8')
             if node_key not in exclude_nodes:
-                search_nodes.append(node_key)
+                node_info = json.loads(conn.get(node_key).decode('utf-8'))
+                del node_info['token']
+                del node_info['node_ip']
+                del node_info['node_port']
+                search_nodes.append(node_info)
         return CustomResponse(
             code=Code.OK,
             msg='Success',
-            data=search_nodes
+            data={
+                'total': len(search_nodes),
+                'list': search_nodes
+            }
         )

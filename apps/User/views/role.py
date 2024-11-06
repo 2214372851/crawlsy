@@ -137,4 +137,4 @@ class RoleOptionViewSet(CustomGenericViewSet, CustomListMixin):
 
 router = routers.DefaultRouter()
 router.register('role', RoleViewSet, basename='role')
-router.register('roleOption', RoleOptionViewSet, basename='role-option')
+router.register('role-option', RoleOptionViewSet, basename='role-option')

@@ -1,6 +1,9 @@
+import json
+
 from rest_framework import serializers
 
 from apps.Node.models import NodeModel
+from utils.node_stat import get_node_conn
 
 
 class NodeSerializer(serializers.ModelSerializer):
@@ -9,13 +12,34 @@ class NodeSerializer(serializers.ModelSerializer):
     """
     createTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     updateTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    nodeLoad = serializers.SerializerMethodField(read_only=True)
 
     def validate_nodeUid(self, value):
         if NodeModel.objects.filter(nodeUid=value).exists():
             raise serializers.ValidationError('节点已存在')
         if self.instance:
             return self.instance.nodeUid
-        return value
+        if get_node_conn().exists(f'{value}_stat'):
+            return value
+        raise serializers.ValidationError('节点不存在')
+
+    def get_nodeLoad(self, obj: NodeModel):
+        stat = get_node_conn().get(f'{obj.nodeUid}_stat')
+        return json.loads(stat.decode('utf-8'))['load'][0]
+
+    class Meta:
+        model = NodeModel
+        fields = '__all__'
+
+
+class NodeDetailSerializer(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    updateTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    monitor = serializers.SerializerMethodField(read_only=True)
+
+    def get_monitor(self, obj: NodeModel):
+        data = get_node_conn().lrange(f'{obj.nodeUid}_monitor', 0, 12)
+        return [json.loads(item.decode('utf-8')) for item in data][::-1]
 
     class Meta:
         model = NodeModel

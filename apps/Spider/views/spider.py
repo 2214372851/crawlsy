@@ -327,5 +327,5 @@ class SpiderTaskViewSet(CustomGenericViewSet, CustomRetrieveMixin):
 
 router = routers.DefaultRouter()
 router.register('spider', SpiderViewSet, basename='spider')
-router.register('spiderTask', SpiderTaskViewSet, basename='spider-task')
-router.register('spiderOption', SpiderOptionViewSet, basename='spider-option')
+router.register('spider-task', SpiderTaskViewSet, basename='spider-task')
+router.register('spider-option', SpiderOptionViewSet, basename='spider-option')

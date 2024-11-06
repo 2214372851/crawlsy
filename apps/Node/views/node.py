@@ -8,7 +8,9 @@ from rest_framework import routers
 from rest_framework.views import Request
 
 from apps.Node.models import NodeModel
-from apps.Node.serializer import NodeSerializer
+from apps.Node.serializer import NodeSerializer, NodeDetailSerializer
+from utils.code import Code
+from utils.response import CustomResponse
 from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
 
 
@@ -101,7 +103,11 @@ class NodeViewSet(CustomModelViewSet):
         }
     )
     def retrieve(self, request: Request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_object()
+        if not instance: return CustomResponse(code=Code.NOT_FOUND, msg='未找到该资源')
+        serializer = NodeDetailSerializer(instance)
+        self.check_object_permissions(request, serializer)
+        return CustomResponse(code=Code.OK, msg='Success', data=serializer.data)
 
     @swagger_auto_schema(
         operation_summary='创建节点',
@@ -139,7 +145,7 @@ class NodeViewSet(CustomModelViewSet):
         }
     )
     def create(self, request, *args, **kwargs):
-        # TODO: 检查节点可用性
+
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -263,4 +269,4 @@ class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
 
 router = routers.DefaultRouter()
 router.register('node', NodeViewSet, basename='node')
-router.register('nodeOption', NodeOptionViewSet, basename='node-option')
+router.register('node-option', NodeOptionViewSet, basename='node-option')

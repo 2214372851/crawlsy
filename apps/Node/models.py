@@ -18,6 +18,7 @@ class NodeModel(models.Model):
             old_value = NodeModel.objects.get(pk=self.pk).nodeUid
             if self.nodeUid != old_value:
                 raise ValidationError("This field node_uid cannot be modified.")
+        super(NodeModel, self).save(*args, **kwargs)
 
     class Meta:
         db_table = 'node'

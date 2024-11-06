@@ -314,6 +314,7 @@ class TaskViewSet(CustomModelViewSet):
         }
     )
     def destroy(self, request, *args, **kwargs):
+        # TODO: 检测并移除所有部署
         return super().destroy(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):

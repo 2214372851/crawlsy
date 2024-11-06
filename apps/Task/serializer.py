@@ -1,7 +1,11 @@
+import json
+
 from rest_framework import serializers
 from apps.Task.models import TaskModel
 from apps.Node.models import NodeModel
 from utils.date import validate_cron
+from utils.node_stat import get_node_conn
+from utils.status import Status
 
 
 class TaskSerializers(serializers.ModelSerializer):
@@ -67,9 +71,16 @@ class TaskDetailSerializers(TaskSerializers):
     taskNodes = serializers.SerializerMethodField(read_only=True)
 
     def get_taskNodes(self, obj: TaskModel):
-        return [{
-            'id': node.id,
-            'name': node.name,
-            'nodeUid': node.nodeUid,
-            'status': node.status
-        } for node in obj.taskNodes.all()]
+        conn = get_node_conn()
+        result = []
+        for node in obj.taskNodes.all():
+            service = conn.get(f"{node.nodeUid}_stat")
+            service = json.loads(service.decode('utf-8'))
+            running_taks = {i['task_id']: i['status'] for i in service['tasks']}
+            result.append({
+                'id': node.id,
+                'name': node.name,
+                'nodeUid': node.nodeUid,
+                'status': running_taks.get(obj.taskUid, Status.NOT_EXIST),
+            })
+        return result
