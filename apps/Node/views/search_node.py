@@ -44,7 +44,7 @@ class SearchNodeView(APIView):
             if node_key not in exclude_nodes:
                 node_info = json.loads(conn.get(node_key).decode('utf-8'))
                 del node_info['token']
-                del node_info['node_ip']
+                del node_info['node_host']
                 del node_info['node_port']
                 search_nodes.append(node_info)
         return CustomResponse(

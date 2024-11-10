@@ -44,7 +44,7 @@ class SchedulerView(APIView):
         :return:
         """
         node_uid = request.query_params.get('nodeUid')
-        task_id = request.query_params.get('taskId')
+        task_uid = request.query_params.get('taskUid')
 
         conn = get_node_conn()
         service = conn.get(f"{node_uid}_stat")
@@ -58,7 +58,7 @@ class SchedulerView(APIView):
             )
         service = json.loads(service.decode('utf-8'))
         running_taks = {i['task_id'] for i in service['tasks']}
-        if task_id not in running_taks:
+        if task_uid not in running_taks:
             return CustomResponse(
                 code=Code.OK,
                 msg='success',
@@ -68,20 +68,24 @@ class SchedulerView(APIView):
             )
         response = requests.get(
             'http:{}:{}/scheduler/node/{}/'.format(
-                service.get('host'),
-                service.get('port'),
-                task_id
+                service.get('node_host'),
+                service.get('node_port'),
+                task_uid
             ),
             params={
                 'token': node_uid
             }
         )
-
+        if response.json().get('code') != Code.OK:
+            return CustomResponse(
+                code=response.json().get('code'),
+                msg=response.json().get('msg'),
+            )
         return CustomResponse(
             code=Code.OK,
             msg='Success',
             data={
-                'status': response.status_code
+                'status': response.json().get('status')
             }
         )
 
@@ -102,14 +106,14 @@ class SchedulerView(APIView):
         """
         停止所有节点上的该任务
         """
-        task_id = request.query_params.get('id')
+        task_uid = request.query_params.get('taskUid')
 
-        task = TaskModel.objects.get(pk=task_id)
+        task = TaskModel.objects.get(taskUid=task_uid)
         nodes = task.taskNodes.all()
         if not nodes:
             return CustomResponse(
                 code=Code.NOT_FOUND,
-                msg='当前任务未部署',
+                msg='当前任务无任务节点',
             )
         conn = get_node_conn()
         errors = {}
@@ -119,15 +123,17 @@ class SchedulerView(APIView):
                 service = json.loads(service.decode('utf-8'))
                 response = requests.delete(
                     'http:{}:{}/scheduler/node/{}/'.format(
-                        service.get('host'),
-                        service.get('port'),
-                        task_id
+                        service.get('node_host'),
+                        service.get('node_port'),
+                        task_uid
                     ),
                     params={
                         'token': service.get('token')
                     }
                 )
                 response.raise_for_status()
+                if response.json().get('code') != Code.OK:
+                    errors[node.nodeUid] = response.json().get('msg')
             except Exception as e:
                 errors[node.nodeUid] = str(e)
         if errors:
@@ -141,20 +147,203 @@ class SchedulerView(APIView):
             msg='Success',
         )
 
-    def put(self, request: Request):
+    @swagger_auto_schema(
+        operation_summary='任务部署',
+        operation_description='部署任务',
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+        ],
+        responses={
+            200: openapi.Response(
+                description='Success',
+                examples={}
+            )
+        }
+    )
+    def post(self, request: Request):
         """
-        重新部署任务
+        部署任务
+            多次部署已经存在的任务的节点将不做处理，未部署的节点将完成部署流程
         """
+        task_uid = request.query_params.get('taskUid')
+
+        task = TaskModel.objects.get(taskUid=task_uid)
+        if task.isTiming:
+            # TODO: 定时任务特殊处理
+            pass
+        nodes = task.taskNodes.all()
+        if not nodes:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='当前任务无任务节点',
+            )
+        conn = get_node_conn()
+        errors = {}
+        for node in nodes:
+            try:
+                service = conn.get(f"{node.nodeUid}_stat")
+                service = json.loads(service.decode('utf-8'))
+                response = requests.post(
+                    'http:{}:{}/scheduler/node/'.format(
+                        service.get('node_host'),
+                        service.get('node_port')
+                    ),
+                    params={
+                        'token': service.get('token')
+                    },
+                    data={
+                        'taskUid': task_uid
+                    }
+                )
+                response.raise_for_status()
+                if response.json().get('code') != Code.OK:
+                    errors[node.nodeUid] = response.json().get('msg')
+            except Exception as e:
+                errors[node.nodeUid] = str(e)
         return CustomResponse(
             code=Code.OK,
             msg='Success',
         )
 
-    def post(self, request: Request):
+    @swagger_auto_schema(
+        operation_summary='任务重新部署',
+        operation_description='重新部署任务',
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+        ],
+        responses={
+            200: openapi.Response(
+                description='Success',
+                examples={}
+            )
+        }
+    )
+    def put(self, request: Request):
         """
-        部署任务
+        重新部署任务
         """
+        task_uid = request.query_params.get('taskUId')
+
+        task = TaskModel.objects.get(taskUid=task_uid)
+        if task.isTiming:
+            # TODO: 定时任务特殊处理
+            pass
+        nodes = task.taskNodes.all()
+        if not nodes:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='当前任务无任务节点',
+            )
+        conn = get_node_conn()
+        errors = {}
+        for node in nodes:
+            try:
+                service = conn.get(f"{node.nodeUid}_stat")
+                service = json.loads(service.decode('utf-8'))
+                response = requests.put(
+                    'http:{}:{}/scheduler/node/{}/'.format(
+                        service.get('node_host'),
+                        service.get('node_port'),
+                        task_uid
+                    ),
+                    params={
+                        'token': service.get('token')
+                    }
+                )
+                response.raise_for_status()
+                if response.json().get('code') != Code.OK:
+                    errors[node.nodeUid] = response.json().get('msg')
+            except Exception as e:
+                errors[node.nodeUid] = str(e)
         return CustomResponse(
             code=Code.OK,
             msg='Success',
+        )
+
+
+class SchedulerLogView(APIView):
+    """
+    调度日志
+    """
+
+    @swagger_auto_schema(
+        operation_summary='开启任务日志',
+        operation_description='开启任务日志',
+        manual_parameters=[
+            openapi.Parameter('nodeUid', openapi.IN_QUERY, description='节点唯一标识', type=openapi.TYPE_STRING),
+            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+        ],
+        responses={
+            200: openapi.Response(
+                description='Success',
+            )
+        }
+    )
+    def get(self, request: Request):
+        node_uid = request.query_params.get('nodeUid')
+        task_uid = request.query_params.get('taskUId')
+        conn = get_node_conn()
+        service = conn.get(f"{node_uid}_stat")
+        service = json.loads(service.decode('utf-8'))
+        token = service.get('token')
+        response = requests.get(
+            'http:{}:{}/scheduler/logs/{}/'.format(
+                service.get('node_host'),
+                service.get('node_port'),
+                task_uid,
+            ),
+            params={
+                'token': token
+            }
+        )
+        if response.json().get('code') != Code.OK:
+            return CustomResponse(
+                code=response.json().get('code'),
+                msg=response.json().get('msg'),
+            )
+        return CustomResponse(
+            code=Code.OK,
+            msg='Success',
+            data=response.json().get('data')
+        )
+
+    @swagger_auto_schema(
+        operation_summary='关闭任务日志',
+        operation_description='关闭任务日志',
+        manual_parameters=[
+            openapi.Parameter('nodeUid', openapi.IN_QUERY, description='节点唯一标识', type=openapi.TYPE_STRING),
+            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+        ],
+        responses={
+            200: openapi.Response(
+                description='Success',
+            )
+        }
+    )
+    def delete(self, request: Request):
+        node_uid = request.query_params.get('nodeUid')
+        task_uid = request.query_params.get('taskUId')
+        conn = get_node_conn()
+        service = conn.get(f"{node_uid}_stat")
+        service = json.loads(service.decode('utf-8'))
+        token = service.get('token')
+        response = requests.delete(
+            'http:{}:{}/scheduler/logs/{}/'.format(
+                service.get('node_host'),
+                service.get('node_port'),
+                task_uid,
+            ),
+            params={
+                'token': token
+            }
+        )
+        if response.json().get('code') != Code.OK:
+            return CustomResponse(
+                code=response.json().get('code'),
+                msg=response.json().get('msg'),
+            )
+        return CustomResponse(
+            code=Code.OK,
+            msg='Success',
+            data=response.json().get('data')
         )

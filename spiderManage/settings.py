@@ -259,8 +259,10 @@ LOGGING = {
 }
 
 # Ide resources
-IDE_RESOURCES = Path('/data/spider_project')
+IDE_ROOT = Path('/data')
+IDE_RESOURCES = IDE_ROOT / 'spider_project'
 IDE_MAX_FILE_SIZE = 1024 * 1024 * 10
+IDE_TEMP = IDE_ROOT / 'spider_temp'
 
 # Celery
 CELERY_BROKER_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/5'

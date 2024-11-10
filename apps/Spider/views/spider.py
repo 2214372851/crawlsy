@@ -6,9 +6,12 @@ from uuid import uuid4
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import routers
-from rest_framework.views import Request
-
+from rest_framework.views import Request, APIView
+from django.http import FileResponse
 from apps.Spider.models import SpiderModel
+from utils.code import Code
+from utils.response import CustomResponse
+from utils.unzip import zip
 from apps.Spider.serializer import SpiderSerializer, SpiderOptionSerializer, SpiderTaskSerializer
 from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin, CustomRetrieveMixin
 from django.conf import settings
@@ -323,6 +326,56 @@ class SpiderTaskViewSet(CustomGenericViewSet, CustomRetrieveMixin):
 
     def filter_queryset(self, queryset):
         return queryset
+
+
+class SpiderPullView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary='爬虫文件下载',
+        operation_description='爬虫文件下载',
+        tags=['爬虫管理'],
+        manual_parameters=[
+            openapi.Parameter(
+                'spiderUid',
+                openapi.IN_QUERY,
+                description='爬虫唯一标识',
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'token',
+                openapi.IN_QUERY,
+                description='主节点token',
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
+    def get(self, request: Request):
+        spider_uid = request.query_params.get('spiderUid')
+        token = request.query_params.get('token')
+        # TODO: 校验token
+        if not spider_uid or not token:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg='参数错误'
+            )
+        project_path = settings.IDE_RESOURCES / spider_uid
+        if not project_path.exists():
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='爬虫不存在'
+            )
+        temp_path = settings.IDE_TEMP / f'{spider_uid}.zip'
+        temp_path.parent.mkdir(exist_ok=True, parents=True)
+        zip(file_path=project_path, zip_filename=temp_path)
+        if temp_path.stat().st_size > 1024 * 1024 * 20:
+            return CustomResponse(
+                code=Code.FAILED_PRECONDITION,
+                msg='文件过大，请压缩后再下载'
+            )
+        zip_file = open(temp_path, 'rb')
+        response = FileResponse(zip_file, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename={spider_uid}.zip'
+        return response
 
 
 router = routers.DefaultRouter()
