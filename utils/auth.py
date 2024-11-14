@@ -1,3 +1,4 @@
+from django.db import close_old_connections
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
@@ -47,3 +48,23 @@ class CustomPermission(BasePermission):
         # print(request.resolver_match.url_name, view.name, view.action, 'has_permission')
 
         return True
+
+
+class WsAuthMiddleware:
+    """
+    自定义websocket认证
+    """
+
+    def __init__(self, inner):
+        self.inner = inner
+
+    def __call__(self, scope, receive, send):
+        close_old_connections()
+        token = scope['query_string']
+        token.decode('utf-8')
+        # TODO: 调试阶段不开启验证
+        # if token:
+        #     uid = verify_token(token)
+        #     if not uid:
+        #         return None
+        return self.inner(scope, receive, send)

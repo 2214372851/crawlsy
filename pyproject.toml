@@ -21,6 +21,8 @@ croniter = "^3.0.3"
 pymysql = "^1.1.1"
 chardet = "^5.2.0"
 eventlet = {version = "^0.37.0", platform = "win32"}
+channels = "^4.1.0"
+daphne = "^4.1.2"
 
 [tool.poetry.extras]
 

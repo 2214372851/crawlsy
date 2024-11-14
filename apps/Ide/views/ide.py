@@ -34,7 +34,17 @@ class IdeApiView(APIView):
             200: openapi.Response(
                 description='ok',
                 examples={
-                    'application/json': {}
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": [
+                            {
+                                "key": "c316ddc7-f095-42dc-8fdc-7dd3b154b395",
+                                "isLeaf": False,
+                                "title": "ROOT-TEST"
+                            }
+                        ]
+                    }
                 })
         }
     )
@@ -44,7 +54,7 @@ class IdeApiView(APIView):
             code=Code.INVALID_ARGUMENT,
             msg="参数为空"
         )
-        resource = SpiderModel.objects.get(pk=resource_id)
+        resource = SpiderModel.objects.filter(pk=resource_id).first()
         if not resource: return CustomResponse(
             code=Code.NOT_FOUND,
             msg="资源不存在"
@@ -81,7 +91,22 @@ class IdeApiView(APIView):
                 description='文件名称',
                 type=openapi.TYPE_STRING
             )
-        ]
+        ],
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": {
+                            "key": "33099171-ad42-4491-89f2-5252ca6d97e0\\test\\我的.py",
+                            "isLeaf": True,
+                            "title": "我的.py"
+                        }
+                    }
+                })
+        }
     )
     def put(self, request: Request):
         path = request.query_params.get('path')
@@ -122,6 +147,21 @@ class IdeApiView(APIView):
                 'name': openapi.Schema(type=openapi.TYPE_STRING)
             }
         ),
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": {
+                            "key": "33099171-ad42-4491-89f2-5252ca6d97e0\\test\\data.json",
+                            "isLeaf": True,
+                            "title": "data.json"
+                        }
+                    }
+                })
+        }
     )
     def post(self, request: Request):
         path = request.data.get('path')
@@ -162,7 +202,17 @@ class IdeApiView(APIView):
                 description='参考项key',
                 type=openapi.TYPE_STRING
             )
-        ]
+        ],
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success"
+                    }
+                })
+        }
     )
     def delete(self, request: Request):
         path = request.query_params.get('path')
@@ -204,7 +254,17 @@ class IdeLazyView(APIView):
             200: openapi.Response(
                 description='ok',
                 examples={
-                    'application/json': {}
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": [
+                            {
+                                "isLeaf": False,
+                                "key": "33099171-ad42-4491-89f2-5252ca6d97e0\\test",
+                                "title": "test"
+                            }
+                        ]
+                    }
                 }
             )
         }
@@ -228,7 +288,7 @@ class IdeLazyView(APIView):
             data=[
                 {
                     "isLeaf": i.is_file(),
-                    "key": str(resource_path / i.name),
+                    "key": str(resource_path.joinpath(i.name).relative_to(settings.IDE_RESOURCES)),
                     "title": i.name
                 } for i in resource_path.iterdir()
             ]
@@ -256,7 +316,11 @@ class IdeFileView(APIView):
             200: openapi.Response(
                 description='ok',
                 examples={
-                    'application/json': {}
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success",
+                        "data": "test text"
+                    }
                 }
             )
         }
@@ -301,6 +365,17 @@ class IdeFileView(APIView):
             }
         ),
         tags=['编辑器管理'],
+        responses={
+            200: openapi.Response(
+                description='ok',
+                examples={
+                    'application/json': {
+                        "code": 0,
+                        "msg": "Success"
+                    }
+                }
+            )
+        }
     )
     def post(self, request: Request):
         path = request.data.get('path')

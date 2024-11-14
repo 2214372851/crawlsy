@@ -8,7 +8,7 @@ from rest_framework import routers
 from rest_framework.views import Request
 
 from apps.Node.models import NodeModel
-from apps.Node.serializer import NodeSerializer, NodeDetailSerializer
+from apps.Node.serializer import NodeSerializer, NodeDetailSerializer, NodeOptionSerializer
 from utils.code import Code
 from utils.response import CustomResponse
 from utils.viewset import CustomModelViewSet, CustomGenericViewSet, CustomListMixin
@@ -221,7 +221,7 @@ class NodeViewSet(CustomModelViewSet):
 
 class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
     queryset = NodeModel.objects.all()
-    serializer_class = NodeSerializer
+    serializer_class = NodeOptionSerializer
     lookup_field = 'id'
     pagination_class = None
 
@@ -264,6 +264,7 @@ class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
         filter_data = queryset
         name = self.request.query_params.get('name', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
+        filter_data = filter_data.filter(status=True)
         return filter_data
 
 

@@ -25,6 +25,8 @@ class NodeSerializer(serializers.ModelSerializer):
 
     def get_nodeLoad(self, obj: NodeModel):
         stat = get_node_conn().get(f'{obj.nodeUid}_stat')
+        if not stat:
+            return 0
         return json.loads(stat.decode('utf-8'))['load'][0]
 
     class Meta:

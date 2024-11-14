@@ -8,7 +8,9 @@
     任务监控
 """
 import json
-import requests
+import logging
+from concurrent.futures import ThreadPoolExecutor
+
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.request import Request
@@ -16,9 +18,12 @@ from rest_framework.views import APIView
 
 from apps.Task.models import TaskModel
 from utils.code import Code
+from utils.node_api import NodeApi
 from utils.node_stat import get_node_conn
 from utils.response import CustomResponse
 from utils.status import Status
+
+logger = logging.getLogger(__name__)
 
 
 class SchedulerView(APIView):
@@ -28,7 +33,7 @@ class SchedulerView(APIView):
         operation_description='获取任务运行状态信息',
         manual_parameters=[
             openapi.Parameter('nodeUid', openapi.IN_QUERY, description='节点唯一标识', type=openapi.TYPE_STRING),
-            openapi.Parameter('taskId', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
         ],
         responses={
             200: openapi.Response(
@@ -66,19 +71,18 @@ class SchedulerView(APIView):
                     'status': Status.NOT_EXIST
                 }
             )
-        response = requests.get(
-            'http:{}:{}/scheduler/node/{}/'.format(
-                service.get('node_host'),
-                service.get('node_port'),
-                task_uid
-            ),
-            params={
-                'token': node_uid
-            }
-        )
-        if response.json().get('code') != Code.OK:
+        try:
+            response = NodeApi.node_task_stat(service, node_uid, task_uid)
+        except Exception as e:
+            logger.error(e, exc_info=True)
             return CustomResponse(
-                code=response.json().get('code'),
+                code=Code.UNKNOWN,
+                msg=str(e),
+            )
+        response_data = response.json()
+        if response_data.get('code') != Code.OK:
+            return CustomResponse(
+                code=response_data.get('code'),
                 msg=response.json().get('msg'),
             )
         return CustomResponse(
@@ -93,7 +97,7 @@ class SchedulerView(APIView):
         operation_summary='任务终止',
         operation_description='任务终止',
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
         ],
         responses={
             200: openapi.Response(
@@ -108,7 +112,12 @@ class SchedulerView(APIView):
         """
         task_uid = request.query_params.get('taskUid')
 
-        task = TaskModel.objects.get(taskUid=task_uid)
+        task = TaskModel.objects.filter(taskUid=task_uid).first()
+        if not task:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='任务不存在',
+            )
         nodes = task.taskNodes.all()
         if not nodes:
             return CustomResponse(
@@ -116,27 +125,18 @@ class SchedulerView(APIView):
                 msg='当前任务无任务节点',
             )
         conn = get_node_conn()
-        errors = {}
-        for node in nodes:
-            try:
-                service = conn.get(f"{node.nodeUid}_stat")
-                service = json.loads(service.decode('utf-8'))
-                response = requests.delete(
-                    'http:{}:{}/scheduler/node/{}/'.format(
-                        service.get('node_host'),
-                        service.get('node_port'),
-                        task_uid
-                    ),
-                    params={
-                        'token': service.get('token')
-                    }
-                )
-                response.raise_for_status()
-                if response.json().get('code') != Code.OK:
-                    errors[node.nodeUid] = response.json().get('msg')
-            except Exception as e:
-                errors[node.nodeUid] = str(e)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi.node_task_stop, conn, node.nodeUid, task_uid)
+            errors = [
+                {
+                    'nodeUid': str(uid),
+                    'error': str(future.exception())
+                } for uid, future in futures.items() if future.exception()
+            ]
         if errors:
+            logger.error(errors[0]['error'], exc_info=True)
             return CustomResponse(
                 code=Code.FAILED_PRECONDITION,
                 msg='任务终止失败',
@@ -150,9 +150,16 @@ class SchedulerView(APIView):
     @swagger_auto_schema(
         operation_summary='任务部署',
         operation_description='部署任务',
-        manual_parameters=[
-            openapi.Parameter('id', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
-        ],
+        request_body=openapi.Schema(
+            # 构造的请求体为 dict 类型
+            type=openapi.TYPE_OBJECT,
+            # 构造的请求体中 必填参数 列表
+            required=['name'],
+            # 自定义请求体 ， key为请求参数名称，值为参数描述
+            properties={
+                'taskUid': openapi.Schema(type=openapi.TYPE_STRING, description='任务唯一识别ID'),
+            }
+        ),
         responses={
             200: openapi.Response(
                 description='Success',
@@ -165,9 +172,13 @@ class SchedulerView(APIView):
         部署任务
             多次部署已经存在的任务的节点将不做处理，未部署的节点将完成部署流程
         """
-        task_uid = request.query_params.get('taskUid')
-
-        task = TaskModel.objects.get(taskUid=task_uid)
+        task_uid = request.data.get('taskUid')
+        task = TaskModel.objects.filter(taskUid=task_uid).first()
+        if not task:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='任务不存在',
+            )
         if task.isTiming:
             # TODO: 定时任务特殊处理
             pass
@@ -178,28 +189,23 @@ class SchedulerView(APIView):
                 msg='当前任务无任务节点',
             )
         conn = get_node_conn()
-        errors = {}
-        for node in nodes:
-            try:
-                service = conn.get(f"{node.nodeUid}_stat")
-                service = json.loads(service.decode('utf-8'))
-                response = requests.post(
-                    'http:{}:{}/scheduler/node/'.format(
-                        service.get('node_host'),
-                        service.get('node_port')
-                    ),
-                    params={
-                        'token': service.get('token')
-                    },
-                    data={
-                        'taskUid': task_uid
-                    }
-                )
-                response.raise_for_status()
-                if response.json().get('code') != Code.OK:
-                    errors[node.nodeUid] = response.json().get('msg')
-            except Exception as e:
-                errors[node.nodeUid] = str(e)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi.node_task_start, conn, node.nodeUid, task_uid)
+            errors = [
+                {
+                    'nodeUid': str(uid),
+                    'error': str(future.exception())
+                } for uid, future in futures.items() if future.exception() is not None
+            ]
+        if errors:
+            logger.error(errors[0]['error'], exc_info=True)
+            return CustomResponse(
+                code=Code.FAILED_PRECONDITION,
+                msg='任务部署失败',
+                data=errors
+            )
         return CustomResponse(
             code=Code.OK,
             msg='Success',
@@ -209,7 +215,7 @@ class SchedulerView(APIView):
         operation_summary='任务重新部署',
         operation_description='重新部署任务',
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
+            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
         ],
         responses={
             200: openapi.Response(
@@ -222,9 +228,13 @@ class SchedulerView(APIView):
         """
         重新部署任务
         """
-        task_uid = request.query_params.get('taskUId')
-
-        task = TaskModel.objects.get(taskUid=task_uid)
+        task_uid = request.query_params.get('taskUid')
+        task = TaskModel.objects.filter(taskUid=task_uid).first()
+        if not task:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='任务不存在',
+            )
         if task.isTiming:
             # TODO: 定时任务特殊处理
             pass
@@ -235,26 +245,23 @@ class SchedulerView(APIView):
                 msg='当前任务无任务节点',
             )
         conn = get_node_conn()
-        errors = {}
-        for node in nodes:
-            try:
-                service = conn.get(f"{node.nodeUid}_stat")
-                service = json.loads(service.decode('utf-8'))
-                response = requests.put(
-                    'http:{}:{}/scheduler/node/{}/'.format(
-                        service.get('node_host'),
-                        service.get('node_port'),
-                        task_uid
-                    ),
-                    params={
-                        'token': service.get('token')
-                    }
-                )
-                response.raise_for_status()
-                if response.json().get('code') != Code.OK:
-                    errors[node.nodeUid] = response.json().get('msg')
-            except Exception as e:
-                errors[node.nodeUid] = str(e)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi.node_task_reload, conn, node.nodeUid, task_uid)
+            errors = [
+                {
+                    'nodeUid': str(uid),
+                    'error': str(future.exception())
+                } for uid, future in futures.items() if future.exception()
+            ]
+        if errors:
+            logger.error(errors[0]['error'], exc_info=True)
+            return CustomResponse(
+                code=Code.FAILED_PRECONDITION,
+                msg='任务重载失败',
+                data=errors
+            )
         return CustomResponse(
             code=Code.OK,
             msg='Success',
@@ -283,23 +290,14 @@ class SchedulerLogView(APIView):
         node_uid = request.query_params.get('nodeUid')
         task_uid = request.query_params.get('taskUId')
         conn = get_node_conn()
-        service = conn.get(f"{node_uid}_stat")
-        service = json.loads(service.decode('utf-8'))
-        token = service.get('token')
-        response = requests.get(
-            'http:{}:{}/scheduler/logs/{}/'.format(
-                service.get('node_host'),
-                service.get('node_port'),
-                task_uid,
-            ),
-            params={
-                'token': token
-            }
-        )
-        if response.json().get('code') != Code.OK:
+
+        try:
+            response = NodeApi.node_task_start_log(conn, node_uid, task_uid)
+        except Exception as e:
+            logger.error(e, exc_info=True)
             return CustomResponse(
-                code=response.json().get('code'),
-                msg=response.json().get('msg'),
+                code=Code.ABORTED,
+                msg=str(e),
             )
         return CustomResponse(
             code=Code.OK,
@@ -324,23 +322,14 @@ class SchedulerLogView(APIView):
         node_uid = request.query_params.get('nodeUid')
         task_uid = request.query_params.get('taskUId')
         conn = get_node_conn()
-        service = conn.get(f"{node_uid}_stat")
-        service = json.loads(service.decode('utf-8'))
-        token = service.get('token')
-        response = requests.delete(
-            'http:{}:{}/scheduler/logs/{}/'.format(
-                service.get('node_host'),
-                service.get('node_port'),
-                task_uid,
-            ),
-            params={
-                'token': token
-            }
-        )
-        if response.json().get('code') != Code.OK:
+
+        try:
+            response = NodeApi.node_task_stop_log(conn, node_uid, task_uid)
+        except Exception as e:
+            logger.error(e, exc_info=True)
             return CustomResponse(
-                code=response.json().get('code'),
-                msg=response.json().get('msg'),
+                code=Code.ABORTED,
+                msg=str(e),
             )
         return CustomResponse(
             code=Code.OK,

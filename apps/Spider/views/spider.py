@@ -9,6 +9,7 @@ from rest_framework import routers
 from rest_framework.views import Request, APIView
 from django.http import FileResponse
 from apps.Spider.models import SpiderModel
+from apps.Task.models import TaskModel
 from utils.code import Code
 from utils.response import CustomResponse
 from utils.unzip import zip
@@ -336,9 +337,9 @@ class SpiderPullView(APIView):
         tags=['爬虫管理'],
         manual_parameters=[
             openapi.Parameter(
-                'spiderUid',
+                'taskUid',
                 openapi.IN_QUERY,
-                description='爬虫唯一标识',
+                description='任务唯一标识',
                 type=openapi.TYPE_STRING
             ),
             openapi.Parameter(
@@ -350,7 +351,14 @@ class SpiderPullView(APIView):
         ]
     )
     def get(self, request: Request):
-        spider_uid = request.query_params.get('spiderUid')
+        task_uid = request.query_params.get('taskUid')
+        spider = TaskModel.objects.filter(taskUid=task_uid).first()
+        if not spider:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='爬虫不存在'
+            )
+        spider_uid = str(spider.taskSpider.spiderUid)
         token = request.query_params.get('token')
         # TODO: 校验token
         if not spider_uid or not token:
@@ -362,7 +370,7 @@ class SpiderPullView(APIView):
         if not project_path.exists():
             return CustomResponse(
                 code=Code.NOT_FOUND,
-                msg='爬虫不存在'
+                msg='爬虫数据不存在'
             )
         temp_path = settings.IDE_TEMP / f'{spider_uid}.zip'
         temp_path.parent.mkdir(exist_ok=True, parents=True)

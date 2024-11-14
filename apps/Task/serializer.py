@@ -75,12 +75,20 @@ class TaskDetailSerializers(TaskSerializers):
         result = []
         for node in obj.taskNodes.all():
             service = conn.get(f"{node.nodeUid}_stat")
+            if service is None:
+                result.append({
+                    'id': node.id,
+                    'name': node.name,
+                    'nodeUid': node.nodeUid,
+                    'status': []
+                })
+                continue
             service = json.loads(service.decode('utf-8'))
-            running_taks = {i['task_id']: i['status'] for i in service['tasks']}
+            running_taks = {i['taskUid']: i['status'] for i in service['tasks']}
             result.append({
                 'id': node.id,
                 'name': node.name,
                 'nodeUid': node.nodeUid,
-                'status': running_taks.get(obj.taskUid, Status.NOT_EXIST),
+                'status': running_taks.get(str(obj.taskUid), Status.NOT_EXIST),
             })
         return result

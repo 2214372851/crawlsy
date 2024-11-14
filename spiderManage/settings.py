@@ -29,6 +29,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_yasg',
-
+    'channels',
     'apps.User',
     'apps.Node',
     'apps.Task',
@@ -77,6 +78,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'spiderManage.wsgi.application'
+
+# django-channels
+ASGI_APPLICATION = 'spiderManage.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -270,3 +274,5 @@ CELERY_RESULT_BACKEND = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
 
 # Node Service
 NODE_SERVICE_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/3'
+
+
