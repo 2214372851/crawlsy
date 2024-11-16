@@ -15,40 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title="SpiderManage API",
-        default_version='v1',
-        description="SpiderManage API Docs",
-        terms_of_service="",
-        contact=openapi.Contact(email="bybxbwg@foxmail.com"),
-    ),
-    public=True,
-)
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
-    path(
-        'docs/',
-        schema_view.with_ui(
-            'swagger',
-            cache_timeout=0
-        ),
-        name='schema-swagger-ui'
-    ),
-    path(
-        'docs-redoc/',
-        schema_view.with_ui(
-            'redoc',
-            cache_timeout=0
-        ),
-        name='redoc-ui'
-    ),
+    path('doc/schema/', SpectacularAPIView.as_view(), name='schema'),  # schema的配置文件的路由，下面两个ui也是根据这个配置文件来生成的
+    path('doc/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  # swagger-ui的路由
+    path('doc/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),  # redoc的路由
     path('api/V1/', include('apps.User.urls')),
     path('api/V1/', include('apps.Node.urls')),
     path('api/V1/', include('apps.Task.urls')),
     path('api/V1/', include('apps.Spider.urls')),
     path('api/V1/', include('apps.Ide.urls')),
+    path('api/V1/', include('apps.Alerts.urls')),
 ]

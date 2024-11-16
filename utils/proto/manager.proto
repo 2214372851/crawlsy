@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package spider_node;
+
+import "google/protobuf/empty.proto";
+
+// 定义状态枚举
+enum Status {
+    ERROR = 0;
+    SUCCESS = 1;
+}
+
+// 请求消息类型
+message TaskStatusRequest {
+    string task_uid = 1;
+}
+
+message TaskStartRequest {
+    string task_uid = 1;
+    string command = 2;
+}
+
+message TaskDeleteRequest {
+    string task_uid = 1;
+}
+
+message TaskReloadRequest {
+    string task_uid = 1;
+}
+
+message TaskLogsOpenRequest {
+    string task_uid = 1;
+}
+
+message TaskLogsCloseRequest {
+    string task_uid = 1;
+}
+
+message PipRequest {
+    string package_name = 1;
+}
+
+// 响应消息类型
+message TaskResponse {
+    Status status = 1;
+    string message = 2;
+    bytes result = 3; // 使用 bytes 类型来表示任意结果数据
+}
+
+// 定义服务
+service SpiderNodeService {
+    rpc TasksStatus (google.protobuf.Empty) returns (TaskResponse);
+    rpc TaskStatus (TaskStatusRequest) returns (TaskResponse);
+    rpc TaskStart (TaskStartRequest) returns (TaskResponse);
+    rpc TaskDelete (TaskDeleteRequest) returns (TaskResponse);
+    rpc TaskReload (TaskReloadRequest) returns (TaskResponse);
+    rpc TaskLogsOpen (TaskLogsOpenRequest) returns (TaskResponse);
+    rpc TaskLogsClose (TaskLogsCloseRequest) returns (TaskResponse);
+    rpc PipList (google.protobuf.Empty) returns (TaskResponse);
+    rpc PipInstall (PipRequest) returns (TaskResponse);
+    rpc PipUninstall (PipRequest) returns (TaskResponse);
+    rpc PipUpdate (PipRequest) returns (TaskResponse);
+}

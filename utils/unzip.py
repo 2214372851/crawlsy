@@ -2,7 +2,7 @@ import zipfile
 from pathlib import Path
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 def zip(file_path: str | Path, zip_filename: str = None):

@@ -12,3 +12,4 @@ class CustomResponse(Response):
         response_data.update(kwargs)
         super().__init__(data=response_data, status=status, headers=headers,
                          exception=False, content_type=None)
+

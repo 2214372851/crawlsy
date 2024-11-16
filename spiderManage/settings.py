@@ -39,13 +39,14 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
-    'drf_yasg',
+    'drf_spectacular',
     'channels',
     'apps.User',
     'apps.Node',
     'apps.Task',
     'apps.Spider',
     'apps.Ide',
+    'apps.Alerts',
 ]
 
 MIDDLEWARE = [
@@ -169,7 +170,7 @@ PASSWORD_HASHERS = {
 # JWT
 TOKEN_ISS = 'SpiderStudio-ISS@2024'
 REFRESH_TOKEN_OUT_TIME = 60 * 60 * 24
-ACCESS_TOKEN_OUT_TIME = 60 * 60
+ACCESS_TOKEN_OUT_TIME = 60
 
 # CORS
 CORS_ORIGIN_ALLOW_ALL = True
@@ -182,32 +183,30 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
     'DEFAULT_PAGINATION_CLASS': 'utils.pagination.CustomPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 匿名用户与认证设置为None
     "UNAUTHENTICATED_USER": None,
     "UNAUTHENTICATED_TOKEN": None,
-    # 'DEFAULT_AUTHENTICATION_CLASSES': ['utils.auth.CustomLoginAuth', ],
-    # 'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
+    'DEFAULT_AUTHENTICATION_CLASSES': ['utils.auth.CustomLoginAuth', ],
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'utils.auth.CustomPermission',
+    ]
 }
 
 # Swagger
-SWAGGER_SETTINGS = {
-    'PERSIST_AUTH': True,
-    'REFETCH_SCHEMA_WITH_AUTH': True,
-    'REFETCH_SCHEMA_ON_LOGOUT': True,
-
-    'SECURITY_DEFINITIONS': {
-        'JWT': {
-            'type': 'apiKey',
-            'name': 'token',
-            'in': 'header'
-        },
-        'RefreshToken': {
-            'type': 'apiKey',
-            'name': 'refresh-token',
-            'in': 'header'
-        }
-    }
+SPECTACULAR_SETTINGS = {
+    'TITLE': '爬虫管理平台API',
+    'DESCRIPTION': '爬虫管理平台API文档',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # 'SCHEMA_PATH_PREFIX': None,
+    # 或者如果有统一的前缀，可以设置成
+    'SCHEMA_PATH_PREFIX': '/api/V1/',
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
 }
 
 # Log
@@ -275,4 +274,10 @@ CELERY_RESULT_BACKEND = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
 # Node Service
 NODE_SERVICE_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/3'
 
-
+# 飞书webhook
+# 应用需要开头以下权限 im:message:send_as_bot,im:message,contact:user.employee_id:readonly,contact:user.id:readonly
+# 消息推送卡片配置 https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/send-feishu-cards-with-app-bots
+APP_ID = 'cli_a7b2a9e17f3dd013'
+APP_SECRET = '4PC9uWLh1mS4LFl1qvIpFfFUqRfnokWi'
+CARD_ID = 'AAqjOpHhoYR3F'
+CARD_VERSION = '0.0.7'

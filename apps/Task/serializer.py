@@ -74,13 +74,13 @@ class TaskDetailSerializers(TaskSerializers):
         conn = get_node_conn()
         result = []
         for node in obj.taskNodes.all():
-            service = conn.get(f"{node.nodeUid}_stat")
+            service = conn.get(f"stat:{node.nodeUid}")
             if service is None:
                 result.append({
                     'id': node.id,
                     'name': node.name,
                     'nodeUid': node.nodeUid,
-                    'status': []
+                    'status': 16
                 })
                 continue
             service = json.loads(service.decode('utf-8'))

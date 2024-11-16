@@ -11,11 +11,10 @@ import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
+from apps.Node.models import NodeModel
 from apps.Task.models import TaskModel
 from utils.code import Code
 from utils.node_api import NodeApi
@@ -23,25 +22,11 @@ from utils.node_stat import get_node_conn
 from utils.response import CustomResponse
 from utils.status import Status
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 class SchedulerView(APIView):
 
-    @swagger_auto_schema(
-        operation_summary='任务状态',
-        operation_description='获取任务运行状态信息',
-        manual_parameters=[
-            openapi.Parameter('nodeUid', openapi.IN_QUERY, description='节点唯一标识', type=openapi.TYPE_STRING),
-            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
-        ],
-        responses={
-            200: openapi.Response(
-                description='Success',
-                examples={}
-            )
-        }
-    )
     def get(self, request: Request):
         """
         获取任务运行状态信息
@@ -52,7 +37,7 @@ class SchedulerView(APIView):
         task_uid = request.query_params.get('taskUid')
 
         conn = get_node_conn()
-        service = conn.get(f"{node_uid}_stat")
+        service = conn.get(f"stat:{node_uid}")
         if service is None:
             return CustomResponse(
                 code=Code.OK,
@@ -72,40 +57,26 @@ class SchedulerView(APIView):
                 }
             )
         try:
-            response = NodeApi.node_task_stat(service, node_uid, task_uid)
+            status, message, result = NodeApi().node_task_stat(service, task_uid)
         except Exception as e:
             logger.error(e, exc_info=True)
             return CustomResponse(
                 code=Code.UNKNOWN,
                 msg=str(e),
             )
-        response_data = response.json()
-        if response_data.get('code') != Code.OK:
+        if not status:
             return CustomResponse(
-                code=response_data.get('code'),
-                msg=response.json().get('msg'),
+                code=Code.UNKNOWN,
+                msg=message,
             )
         return CustomResponse(
             code=Code.OK,
             msg='Success',
             data={
-                'status': response.json().get('status')
+                'status': result
             }
         )
 
-    @swagger_auto_schema(
-        operation_summary='任务终止',
-        operation_description='任务终止',
-        manual_parameters=[
-            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
-        ],
-        responses={
-            200: openapi.Response(
-                description='Success',
-                examples={}
-            )
-        }
-    )
     def delete(self, request: Request):
         """
         停止所有节点上的该任务
@@ -128,52 +99,26 @@ class SchedulerView(APIView):
         with ThreadPoolExecutor(max_workers=20) as executor:
             futures = {}
             for node in nodes:
-                futures[node.nodeUid] = executor.submit(NodeApi.node_task_stop, conn, node.nodeUid, task_uid)
-            errors = [
-                {
-                    'nodeUid': str(uid),
-                    'error': str(future.exception())
-                } for uid, future in futures.items() if future.exception()
-            ]
-        if errors:
-            logger.error(errors[0]['error'], exc_info=True)
-            return CustomResponse(
-                code=Code.FAILED_PRECONDITION,
-                msg='任务终止失败',
-                data=errors
-            )
+                futures[node.nodeUid] = executor.submit(NodeApi().node_task_stop, conn, node.nodeUid, task_uid)
+            results = [i.result() for i in futures.values() if i.result()]
+        for status, message, result in results:
+            if not status:
+                return CustomResponse(
+                    code=Code.UNKNOWN,
+                    msg=message,
+                )
         return CustomResponse(
             code=Code.OK,
             msg='Success',
         )
 
-    @swagger_auto_schema(
-        operation_summary='任务部署',
-        operation_description='部署任务',
-        request_body=openapi.Schema(
-            # 构造的请求体为 dict 类型
-            type=openapi.TYPE_OBJECT,
-            # 构造的请求体中 必填参数 列表
-            required=['name'],
-            # 自定义请求体 ， key为请求参数名称，值为参数描述
-            properties={
-                'taskUid': openapi.Schema(type=openapi.TYPE_STRING, description='任务唯一识别ID'),
-            }
-        ),
-        responses={
-            200: openapi.Response(
-                description='Success',
-                examples={}
-            )
-        }
-    )
     def post(self, request: Request):
         """
         部署任务
             多次部署已经存在的任务的节点将不做处理，未部署的节点将完成部署流程
         """
         task_uid = request.data.get('taskUid')
-        task = TaskModel.objects.filter(taskUid=task_uid).first()
+        task: TaskModel = TaskModel.objects.filter(taskUid=task_uid).first()
         if not task:
             return CustomResponse(
                 code=Code.NOT_FOUND,
@@ -189,41 +134,31 @@ class SchedulerView(APIView):
                 msg='当前任务无任务节点',
             )
         conn = get_node_conn()
+        command = task.taskSpider.command
+        if not command:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='爬虫未配置启动命令',
+            )
         with ThreadPoolExecutor(max_workers=20) as executor:
             futures = {}
             for node in nodes:
-                futures[node.nodeUid] = executor.submit(NodeApi.node_task_start, conn, node.nodeUid, task_uid)
-            errors = [
-                {
-                    'nodeUid': str(uid),
-                    'error': str(future.exception())
-                } for uid, future in futures.items() if future.exception() is not None
-            ]
-        if errors:
-            logger.error(errors[0]['error'], exc_info=True)
+                futures[node.nodeUid] = executor.submit(
+                    NodeApi().node_task_start, conn,
+                    node.nodeUid, task_uid, command
+                )
+            results = [i.result() for i in futures.values() if i.result()]
+            for status, message, result in results:
+                if not status:
+                    return CustomResponse(
+                        code=Code.UNKNOWN,
+                        msg=message,
+                    )
             return CustomResponse(
-                code=Code.FAILED_PRECONDITION,
-                msg='任务部署失败',
-                data=errors
+                code=Code.OK,
+                msg='Success',
             )
-        return CustomResponse(
-            code=Code.OK,
-            msg='Success',
-        )
 
-    @swagger_auto_schema(
-        operation_summary='任务重新部署',
-        operation_description='重新部署任务',
-        manual_parameters=[
-            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
-        ],
-        responses={
-            200: openapi.Response(
-                description='Success',
-                examples={}
-            )
-        }
-    )
     def put(self, request: Request):
         """
         重新部署任务
@@ -248,91 +183,126 @@ class SchedulerView(APIView):
         with ThreadPoolExecutor(max_workers=20) as executor:
             futures = {}
             for node in nodes:
-                futures[node.nodeUid] = executor.submit(NodeApi.node_task_reload, conn, node.nodeUid, task_uid)
-            errors = [
-                {
-                    'nodeUid': str(uid),
-                    'error': str(future.exception())
-                } for uid, future in futures.items() if future.exception()
-            ]
-        if errors:
-            logger.error(errors[0]['error'], exc_info=True)
+                futures[node.nodeUid] = executor.submit(NodeApi().node_task_reload, conn, node.nodeUid, task_uid)
+            results = [i.result() for i in futures.values() if i.result()]
+            for status, message, result in results:
+                if not status:
+                    return CustomResponse(
+                        code=Code.UNKNOWN,
+                        msg=message,
+                    )
             return CustomResponse(
-                code=Code.FAILED_PRECONDITION,
-                msg='任务重载失败',
-                data=errors
+                code=Code.OK,
+                msg='Success',
             )
-        return CustomResponse(
-            code=Code.OK,
-            msg='Success',
-        )
 
 
-class SchedulerLogView(APIView):
+class SchedulerPackageView(APIView):
     """
-    调度日志
+    调度包管理
     """
 
-    @swagger_auto_schema(
-        operation_summary='开启任务日志',
-        operation_description='开启任务日志',
-        manual_parameters=[
-            openapi.Parameter('nodeUid', openapi.IN_QUERY, description='节点唯一标识', type=openapi.TYPE_STRING),
-            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
-        ],
-        responses={
-            200: openapi.Response(
-                description='Success',
-            )
-        }
-    )
     def get(self, request: Request):
-        node_uid = request.query_params.get('nodeUid')
-        task_uid = request.query_params.get('taskUId')
         conn = get_node_conn()
-
-        try:
-            response = NodeApi.node_task_start_log(conn, node_uid, task_uid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return CustomResponse(
-                code=Code.ABORTED,
-                msg=str(e),
-            )
+        nodes = NodeModel.objects.filter(status=True)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi().node_pip_list, conn, node.nodeUid)
+            results = [i.result() for i in futures.values() if not i.exception()]
+        response_data = {}
+        for status, message, result in results:
+            if not status:
+                return CustomResponse(
+                    code=Code.UNKNOWN,
+                    msg=message,
+                )
+            for item in result:
+                key = '{}:{}'.format(item['name'], item['version'])
+                response_data[key] = {
+                    'name': item['name'],
+                    'version': item['version']
+                }
         return CustomResponse(
             code=Code.OK,
             msg='Success',
-            data=response.json().get('data')
+            data={
+                'total': len(response_data),
+                'list': response_data.values()
+            }
         )
 
-    @swagger_auto_schema(
-        operation_summary='关闭任务日志',
-        operation_description='关闭任务日志',
-        manual_parameters=[
-            openapi.Parameter('nodeUid', openapi.IN_QUERY, description='节点唯一标识', type=openapi.TYPE_STRING),
-            openapi.Parameter('taskUid', openapi.IN_QUERY, description='任务唯一标识', type=openapi.TYPE_STRING),
-        ],
-        responses={
-            200: openapi.Response(
-                description='Success',
-            )
-        }
-    )
-    def delete(self, request: Request):
-        node_uid = request.query_params.get('nodeUid')
-        task_uid = request.query_params.get('taskUId')
-        conn = get_node_conn()
-
-        try:
-            response = NodeApi.node_task_stop_log(conn, node_uid, task_uid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
+    def post(self, request: Request):
+        package_name = request.data.get('packageName', '').strip()
+        if not package_name:
             return CustomResponse(
-                code=Code.ABORTED,
-                msg=str(e),
+                code=Code.INVALID_ARGUMENT,
+                msg='调度包名称不能为空',
             )
+        conn = get_node_conn()
+        nodes = NodeModel.objects.filter(status=True)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi().node_pip_install, conn, node.nodeUid, package_name)
+            results = [i.result() for i in futures.values() if i.result()]
+        for status, message, result in results:
+            if not status:
+                return CustomResponse(
+                    code=Code.UNKNOWN,
+                    msg=message,
+                )
         return CustomResponse(
             code=Code.OK,
             msg='Success',
-            data=response.json().get('data')
+        )
+
+    def delete(self, request: Request):
+        package_name = request.query_params.get('packageName', '').strip()
+        if not package_name:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg='调度包名称不能为空',
+            )
+        conn = get_node_conn()
+        nodes = NodeModel.objects.filter(status=True)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi().node_pip_uninstall, conn, node.nodeUid, package_name)
+            results = [i.result() for i in futures.values() if i.result()]
+            for status, message, result in results:
+                if not status:
+                    return CustomResponse(
+                        code=Code.UNKNOWN,
+                        msg=message,
+                    )
+        return CustomResponse(
+            code=Code.OK,
+            msg='Success',
+        )
+
+    def put(self, request: Request):
+        package_name = request.query_params.get('packageName', '').strip()
+        if not package_name:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg='调度包名称不能为空',
+            )
+        conn = get_node_conn()
+        nodes = NodeModel.objects.filter(status=True)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {}
+            for node in nodes:
+                futures[node.nodeUid] = executor.submit(NodeApi().node_pip_update, conn, node.nodeUid, package_name)
+            results = [i.result() for i in futures.values() if i.result()]
+        for status, message, result in results:
+            if not status:
+                return CustomResponse(
+                    code=Code.UNKNOWN,
+                    msg=message,
+                )
+        return CustomResponse(
+            code=Code.OK,
+            msg='Success',
         )

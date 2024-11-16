@@ -1,8 +1,7 @@
+import shutil
 from pathlib import Path
-from uuid import uuid4
 
 from django.db import models
-import shutil
 
 
 class SpiderModel(models.Model):
@@ -16,6 +15,7 @@ class SpiderModel(models.Model):
     founder = models.ForeignKey('User.UserModel', on_delete=models.SET_NULL, null=True, blank=True,
                                 verbose_name='创建人')
     status = models.BooleanField(default=True, verbose_name='爬虫状态')
+    command = models.CharField(max_length=128, null=True, blank=True, verbose_name='启动命令')
     createTime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -23,3 +23,9 @@ class SpiderModel(models.Model):
         if Path(self.resources).exists():
             shutil.rmtree(self.resources)
         return super().delete(using, keep_parents)
+
+    class Meta:
+        db_table = 'spider'
+        ordering = ['-createTime']
+        verbose_name = '爬虫'
+        verbose_name_plural = verbose_name

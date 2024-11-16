@@ -3,9 +3,10 @@
     "model": "User.MenuModel",
     "pk": 1,
     "fields": {
-      "name": "首页",
-      "icon": "Home",
-      "path": "home",
+      "name": "仪表板",
+      "icon": "IconApps",
+      "path": "/dashboard",
+      "parent": null,
       "createTime": "2024-07-07T06:08:03.000Z",
       "updateTime": "2024-07-07T06:08:03.000Z"
     }
@@ -14,9 +15,10 @@
     "model": "User.MenuModel",
     "pk": 2,
     "fields": {
-      "name": "用户管理",
-      "icon": "User",
-      "path": "user",
+      "name": "节点管理",
+      "icon": "iconStorage",
+      "path": "/node",
+      "parent": null,
       "createTime": "2024-07-07T06:08:03.000Z",
       "updateTime": "2024-07-07T06:08:03.000Z"
     }
@@ -25,9 +27,10 @@
     "model": "User.MenuModel",
     "pk": 3,
     "fields": {
-      "name": "角色管理",
-      "icon": "Role",
-      "path": "role",
+      "name": "爬虫管理",
+      "icon": "IconBug",
+      "path": "/spider",
+      "parent": null,
       "createTime": "2024-07-07T06:08:03.000Z",
       "updateTime": "2024-07-07T06:08:03.000Z"
     }
@@ -36,9 +39,10 @@
     "model": "User.MenuModel",
     "pk": 4,
     "fields": {
-      "name": "菜单管理",
-      "icon": "Menu",
-      "path": "menu",
+      "name": "任务管理",
+      "icon": "iconSelectAll",
+      "path": "/task",
+      "parent": null,
       "createTime": "2024-07-07T06:08:03.000Z",
       "updateTime": "2024-07-07T06:08:03.000Z"
     }
@@ -47,13 +51,78 @@
     "model": "User.MenuModel",
     "pk": 5,
     "fields": {
-      "name": "权限管理",
-      "icon": "Permission",
-      "path": "permission",
+      "name": "依赖管理",
+      "icon": "iconLock",
+      "path": "/package",
+      "parent": null,
       "createTime": "2024-07-07T06:08:03.000Z",
       "updateTime": "2024-07-07T06:08:03.000Z"
     }
   },
+  {
+    "model": "User.MenuModel",
+    "pk": 6,
+    "fields": {
+      "name": "系统管理",
+      "icon": "IconSettings",
+      "path": "/user",
+      "parent": null,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 7,
+    "fields": {
+      "name": "用户管理",
+      "icon": "IconUser",
+      "path": "/user",
+      "parent": 6,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 8,
+    "fields": {
+      "name": "权限管理",
+      "icon": "iconLock",
+      "path": "/permission",
+      "parent": 6,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 9,
+    "fields": {
+      "name": "角色管理",
+      "icon": "iconLock",
+      "path": "/role",
+      "parent": 6,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+  {
+    "model": "User.MenuModel",
+    "pk": 10,
+    "fields": {
+      "name": "菜单管理",
+      "icon": "iconLock",
+      "path": "/menu",
+      "parent": 6,
+      "createTime": "2024-07-07T06:08:03.000Z",
+      "updateTime": "2024-07-07T06:08:03.000Z"
+    }
+  },
+
+
+
+
   {
     "model": "User.PermissionModel",
     "pk": 1,
@@ -114,6 +183,9 @@
       "updateTime": "2024-07-07T06:08:03.000Z"
     }
   },
+
+
+
   {
     "model": "User.RoleModel",
     "pk": 1,

@@ -9,8 +9,14 @@ class UserSerializer(serializers.ModelSerializer):
     """
     createTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     updateTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    lastLoginTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     role = serializers.PrimaryKeyRelatedField(many=True, queryset=RoleModel.objects, required=True)
     password = serializers.CharField(write_only=True)
+    feishu_id = serializers.CharField(write_only=True)
+    feishu = serializers.SerializerMethodField(read_only=True)
+
+    def get_feishu(self, obj):
+        return bool(obj.feishu_id)
 
     def validate_username(self, value):
         if not 30 > len(value) > 1:
@@ -50,6 +56,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = UserModel
         exclude = ['id', ]
         read_only_fields = ('uid',)
+
+
+class UserOptionSerializer(serializers.ModelSerializer):
+    """
+    用户选项序列化器
+    """
+
+    class Meta:
+        model = UserModel
+        fields = ('id', 'username')
 
 
 class RoleSerializer(serializers.ModelSerializer):

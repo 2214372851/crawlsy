@@ -2,8 +2,7 @@ import shutil
 from pathlib import Path
 
 from django.conf import settings
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
@@ -18,36 +17,7 @@ class IdeApiView(APIView):
     IDE视图
     """
 
-    @swagger_auto_schema(
-        operation_summary='资源列表',
-        operation_description='资源列表',
-        manual_parameters=[
-            openapi.Parameter(
-                'id',
-                openapi.IN_QUERY,
-                description='资源ID',
-                type=openapi.TYPE_NUMBER
-            ),
-        ],
-        tags=['编辑器管理'],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success",
-                        "data": [
-                            {
-                                "key": "c316ddc7-f095-42dc-8fdc-7dd3b154b395",
-                                "isLeaf": False,
-                                "title": "ROOT-TEST"
-                            }
-                        ]
-                    }
-                })
-        }
-    )
+
     def get(self, request: Request):
         resource_id = request.query_params.get('id')
         if not resource_id: return CustomResponse(
@@ -74,40 +44,7 @@ class IdeApiView(APIView):
             ]
         )
 
-    @swagger_auto_schema(
-        operation_summary='资源重命名',
-        operation_description='资源重命名',
-        tags=['编辑器管理'],
-        manual_parameters=[
-            openapi.Parameter(
-                'path',
-                openapi.IN_QUERY,
-                description='文件路径',
-                type=openapi.TYPE_STRING
-            ),
-            openapi.Parameter(
-                'name',
-                openapi.IN_QUERY,
-                description='文件名称',
-                type=openapi.TYPE_STRING
-            )
-        ],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success",
-                        "data": {
-                            "key": "33099171-ad42-4491-89f2-5252ca6d97e0\\test\\我的.py",
-                            "isLeaf": True,
-                            "title": "我的.py"
-                        }
-                    }
-                })
-        }
-    )
+
     def put(self, request: Request):
         path = request.query_params.get('path')
         name = request.query_params.get('name')
@@ -136,33 +73,7 @@ class IdeApiView(APIView):
             }
         )
 
-    @swagger_auto_schema(
-        operation_summary='新建资源',
-        operation_description='新建资源',
-        tags=['编辑器管理'],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'path': openapi.Schema(type=openapi.TYPE_STRING),
-                'name': openapi.Schema(type=openapi.TYPE_STRING)
-            }
-        ),
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success",
-                        "data": {
-                            "key": "33099171-ad42-4491-89f2-5252ca6d97e0\\test\\data.json",
-                            "isLeaf": True,
-                            "title": "data.json"
-                        }
-                    }
-                })
-        }
-    )
+
     def post(self, request: Request):
         path = request.data.get('path')
         name = request.data.get('name')
@@ -191,29 +102,7 @@ class IdeApiView(APIView):
             }
         )
 
-    @swagger_auto_schema(
-        operation_summary='删除资源',
-        operation_description='删除资源',
-        tags=['编辑器管理'],
-        manual_parameters=[
-            openapi.Parameter(
-                'path',
-                openapi.IN_QUERY,
-                description='参考项key',
-                type=openapi.TYPE_STRING
-            )
-        ],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success"
-                    }
-                })
-        }
-    )
+
     def delete(self, request: Request):
         path = request.query_params.get('path')
         resource_path = settings.IDE_RESOURCES / path
@@ -238,37 +127,7 @@ class IdeLazyView(APIView):
     IDE懒加载视图
     """
 
-    @swagger_auto_schema(
-        operation_summary='懒加载',
-        operation_description='懒加载',
-        manual_parameters=[
-            openapi.Parameter(
-                'path',
-                openapi.IN_QUERY,
-                description='参考项key',
-                type=openapi.TYPE_STRING
-            )
-        ],
-        tags=['编辑器管理'],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success",
-                        "data": [
-                            {
-                                "isLeaf": False,
-                                "key": "33099171-ad42-4491-89f2-5252ca6d97e0\\test",
-                                "title": "test"
-                            }
-                        ]
-                    }
-                }
-            )
-        }
-    )
+
     def get(self, request: Request):
         path = request.query_params.get('path')
         if not path: return CustomResponse(
@@ -300,31 +159,7 @@ class IdeFileView(APIView):
     IDE文件视图
     """
 
-    @swagger_auto_schema(
-        operation_summary='资源内容',
-        operation_description='资源内容',
-        manual_parameters=[
-            openapi.Parameter(
-                'path',
-                openapi.IN_QUERY,
-                description='资源路径',
-                type=openapi.TYPE_STRING
-            ),
-        ],
-        tags=['编辑器管理'],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success",
-                        "data": "test text"
-                    }
-                }
-            )
-        }
-    )
+
     def get(self, request: Request):
         path = request.query_params.get('path')
         resource_path = settings.IDE_RESOURCES / path
@@ -354,29 +189,7 @@ class IdeFileView(APIView):
             data=resource_path.read_text(encoding='utf-8')
         )
 
-    @swagger_auto_schema(
-        operation_summary='资源内容修改',
-        operation_description='资源内容修改',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'path': openapi.Schema(type=openapi.TYPE_STRING),
-                'content': openapi.Schema(type=openapi.TYPE_STRING)
-            }
-        ),
-        tags=['编辑器管理'],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success"
-                    }
-                }
-            )
-        }
-    )
+
     def post(self, request: Request):
         path = request.data.get('path')
         content = request.data.get('content')

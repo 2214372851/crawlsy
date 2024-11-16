@@ -6,7 +6,7 @@ from apps.Node.models import NodeModel
 import logging
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 @shared_task
@@ -17,10 +17,10 @@ def node_detection():
     conn = redis.StrictRedis.from_url(settings.NODE_SERVICE_URL)
 
     search_nodes = []
-    for key in conn.keys('*_stat'):
+    for key in conn.keys('stat:*'):
         key: bytes
         node_key = key.decode('utf-8')
-        search_nodes.append(node_key.replace('_stat', ''))
+        search_nodes.append(node_key.replace('stat:', ''))
     for node in NodeModel.objects.all():
 
         status = str(node.nodeUid) in search_nodes

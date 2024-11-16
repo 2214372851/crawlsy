@@ -19,6 +19,7 @@ class UserModel(models.Model):
     status = models.BooleanField(default=False, verbose_name='状态')
     lastLoginTime = models.DateTimeField(auto_now=True, verbose_name='最后登录时间')
     role = models.ManyToManyField('RoleModel', verbose_name='角色')
+    feishu_id = models.CharField(max_length=32, null=True, blank=True, verbose_name='飞书用户ID')
 
     def check_password(self, password):
         return check_password(password, self.password)

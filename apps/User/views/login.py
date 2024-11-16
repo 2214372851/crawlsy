@@ -1,48 +1,20 @@
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from django.db.models import Prefetch
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
+from apps.User.models import UserModel, PermissionModel
 from utils.code import Code
 from utils.response import CustomResponse
 from utils.token import login_token, remove_token, refresh_access_token
-from apps.User.models import UserModel
-from django.db.models import QuerySet
 
 
 class LoginView(APIView):
     """
     登录视图
     """
+    authentication_classes = []
+    permission_classes = []
 
-    @swagger_auto_schema(
-        operation_summary='用户登录',
-        operation_description='输入邮箱或手机号与密码进行登录',
-        tags=['登录'],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['account', 'password'],
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='账号'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='密码')
-            }
-        ),
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success",
-                        "data": {
-                            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTM5ODI3NzYsImlhdCI6MTcxMzk3OTE3NiwiaXNzIjoiU3BpZGVyU3R1ZGlvLUlTU0AyMDI0IiwiZGF0YSI6eyJ1c2VyX2d1aWQiOiIzN2ZkOGQ1My0xMzdjLTRmYTEtYTIwYi1mZGQ1YmE2YzFhMmEifX0.F7C29xq33r-a4QXULFHy2ZUeGReBT_vHf_YkpYa88Lw",
-                            "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTQwNjU1NzYsImlhdCI6MTcxMzk3OTE3NiwiaXNzIjoiU3BpZGVyU3R1ZGlvLUlTU0AyMDI0IiwiZGF0YSI6eyJ1c2VyX2d1aWQiOiIzN2ZkOGQ1My0xMzdjLTRmYTEtYTIwYi1mZGQ1YmE2YzFhMmEifX0.0BM9BrKn_IBf4BiPlEWkXeINYwwJ--vGnxaxb8wNOHU",
-                            "username": "admin"
-                        }
-                    }
-                })
-        }
-    )
     def post(self, request: Request):
         email, password = request.data.get('email'), request.data.get('password')
         if not UserModel.objects.filter(email=email).exists():
@@ -54,21 +26,41 @@ class LoginView(APIView):
             return CustomResponse(code=Code.PERMISSION_DENIED, msg='账号已被禁用')
         menus = {}
         permissions = {}
-        for role in user.role.all():
-            for permission in role.permissions.all():
-                menus[permission.menu.id] = {
-                    'id': permission.menu.id,
-                    'name': permission.menu.name,
-                    'path': permission.menu.path,
-                    'icon': permission.menu.icon,
-                    'parent': permission.menu.parent.id if permission.menu.parent else None
+        prefetch = Prefetch(
+            'permissions',
+            queryset=PermissionModel.objects.select_related('menu', 'menu__parent').all(),
+            to_attr='prefetched_permissions'
+        )
+
+        roles = user.role.prefetch_related(prefetch).all()
+
+        def add_menu(item):
+            if item.id not in menus:
+                menus[item.id] = {
+                    'id': item.id,
+                    'name': item.name,
+                    'path': item.path,
+                    'icon': item.icon,
+                    'parent': item.parent.id if item.parent else None
                 }
+                if item.parent:
+                    add_menu(item.parent)
+
+        for role in roles:
+            for permission in role.prefetched_permissions:
+                menu = permission.menu
+                add_menu(menu)
+
                 if permission.path not in permissions:
-                    permissions[permission.path] = []
-                if permission.method in permissions[permission.path]:
-                    continue
-                permissions[permission.path].append(permission.method)
+                    permissions[permission.path] = set()
+
+                if permission.method not in permissions[permission.path]:
+                    permissions[permission.path].add(permission.method)
+
+        for path in permissions:
+            permissions[path] = list(permissions[path])
         access_token, refresh_token = login_token(user)
+        user.update_login_time()
         return CustomResponse(
             code=Code.OK,
             msg='登录成功',
@@ -89,22 +81,8 @@ class LogoutView(APIView):
     """
     注销视图
     """
+    permission_classes = []
 
-    @swagger_auto_schema(
-        operation_summary='用户注销',
-        operation_description='注销当前登录用户',
-        tags=['登录'],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "注销成功"
-                    }
-                })
-        }
-    )
     def get(self, request: Request):
         remove_token(request.META.get('HTTP_TOKEN'))
         return CustomResponse(code=Code.OK, msg='注销成功')
@@ -114,25 +92,11 @@ class RefreshTokenView(APIView):
     """
     无感刷新 Token 视图
     """
+    authentication_classes = []
+    permission_classes = []
 
-    @swagger_auto_schema(
-        operation_summary='刷新身份信息',
-        operation_description='根据 refresh token 刷新 access token',
-        tags=['登录'],
-        responses={
-            200: openapi.Response(
-                description='ok',
-                examples={
-                    'application/json': {
-                        "code": 0,
-                        "msg": "Success"
-                    }
-                })
-        }
-    )
     def get(self, request):
-        print(request.META)
-        access_token = refresh_access_token(request.META.get('HTTP_REFRESH_TOKEN'))
+        access_token = refresh_access_token(request.META.get('HTTP_REFRESHTOKEN'))
         if not access_token:
-            return CustomResponse(code=Code.INVALID_ARGUMENT, msg='身份信息过期')
+            return CustomResponse(code=Code.INVALID_ARGUMENT, msg='身份信息不合法')
         return CustomResponse(code=Code.OK, msg='Success', data={'accessToken': access_token})

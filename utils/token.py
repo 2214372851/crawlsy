@@ -33,21 +33,28 @@ def login_token(user: UserModel):
     access_cache = caches['access_token']
     refresh_cache = caches['refresh_token']
     access_cache.set(str(uid), access_token, timeout=settings.ACCESS_TOKEN_OUT_TIME)
-    refresh_cache.set(str(uid), refresh_token, timeout=settings.ACCESS_TOKEN_OUT_TIME)
+    refresh_cache.set(str(uid), refresh_token, timeout=settings.REFRESH_TOKEN_OUT_TIME)
     return access_token, refresh_token
 
 
-def verify_token(token):
+def verify_token(token, refresh=False):
     """
     验证token是否正确
     :param token: user request token
+    :param refresh: Whether to refresh the token
     :return payload/False: token data/verify lose
     """
     if not token: raise NotAuthenticated(detail='未携带身份信息')
-    payload = jwt.decode(token, settings.SECRET_KEY, issuer=settings.TOKEN_ISS, algorithms=['HS256'])
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, issuer=settings.TOKEN_ISS, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise NotAuthenticated(detail='身份信息已过期')
     uid = payload.get('data', {}).get('uid', None)
     if not uid: return False
-    cache = caches['access_token']
+    if refresh:
+        cache = caches['refresh_token']
+    else:
+        cache = caches['access_token']
     server_token = cache.get(str(uid))
     if not server_token: return False
     if server_token != token: return False
@@ -61,7 +68,10 @@ def refresh_access_token(token):
     :return payload/False: token data/verify lose
     """
     if not token: raise NotAuthenticated(detail='未携带身份信息')
-    payload = jwt.decode(token, settings.SECRET_KEY, issuer=settings.TOKEN_ISS, algorithms=['HS256'])
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, issuer=settings.TOKEN_ISS, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise NotAuthenticated(detail='身份信息已过期')
     uid = payload.get('data', {}).get('uid', None)
     if not uid: return False
     refresh_cache = caches['refresh_token']

@@ -11,7 +11,6 @@ Django = "4.2.1"
 django-cors-headers = "^3.14.0"
 django-redis = "^5.2.0"
 djangorestframework = "^3.14.0"
-drf-yasg = "^1.21.7"
 PyJWT = "^2.6.0"
 redis = "^4.5.5"
 
@@ -20,9 +19,12 @@ requests = "^2.32.3"
 croniter = "^3.0.3"
 pymysql = "^1.1.1"
 chardet = "^5.2.0"
-eventlet = {version = "^0.37.0", platform = "win32"}
+eventlet = { version = "^0.37.0", platform = "win32" }
 channels = "^4.1.0"
 daphne = "^4.1.2"
+grpcio = "^1.67.1"
+grpcio-tools = "^1.67.1"
+drf-spectacular = "^0.27.2"
 
 [tool.poetry.extras]
 

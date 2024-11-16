@@ -19,12 +19,12 @@ class NodeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('节点已存在')
         if self.instance:
             return self.instance.nodeUid
-        if get_node_conn().exists(f'{value}_stat'):
+        if get_node_conn().exists(f'stat:{value}'):
             return value
         raise serializers.ValidationError('节点不存在')
 
     def get_nodeLoad(self, obj: NodeModel):
-        stat = get_node_conn().get(f'{obj.nodeUid}_stat')
+        stat = get_node_conn().get(f'stat:{obj.nodeUid}')
         if not stat:
             return 0
         return json.loads(stat.decode('utf-8'))['load'][0]
@@ -40,7 +40,7 @@ class NodeDetailSerializer(serializers.ModelSerializer):
     monitor = serializers.SerializerMethodField(read_only=True)
 
     def get_monitor(self, obj: NodeModel):
-        data = get_node_conn().lrange(f'{obj.nodeUid}_monitor', 0, 12)
+        data = get_node_conn().lrange(f'monitor:{obj.nodeUid}', 0, 30)
         return [json.loads(item.decode('utf-8')) for item in data][::-1]
 
     class Meta:
