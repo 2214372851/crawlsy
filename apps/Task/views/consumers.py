@@ -29,10 +29,10 @@ class LogsConsumer(AsyncWebsocketConsumer):
         self.task_uid = self.scope['url_route']['kwargs']['task_uid']
         self.node_uid = self.scope['url_route']['kwargs']['node_uid']
         await self.accept()
-        # status, message, result = NodeApi().node_task_start_log(self.conn, self.node_uid, self.task_uid)
-        # if not status:
-        #     await self.send(f'[{message}]')
-        #     await self.close()
+        status, message, result = NodeApi().node_task_start_log(self.conn, self.node_uid, self.task_uid)
+        if not status:
+            await self.send(f'[{message}]')
+            await self.close()
         self.subscribe_key = "{}:{}".format(self.node_uid, self.task_uid)
         self.task = asyncio.create_task(self.read_logs())
         logger.info("websocket connect {}".format(self.scope['url_route']))
@@ -55,17 +55,14 @@ class LogsConsumer(AsyncWebsocketConsumer):
         raise StopConsumer()
 
     async def read_logs(self):
-        # pubsub = self.conn.pubsub()
-        # pubsub.subscribe(self.subscribe_key)
-        # try:
-        #     while not self.stop_event.is_set():
-        #         message = pubsub.get_message(timeout=1)
-        #         if message and message['type'] == 'message':
-        #             data = message['data'].decode('utf-8')
-        #             await self.send(text_data=data)
-        #         await asyncio.sleep(0.6)
-        # finally:
-        #     pubsub.unsubscribe(self.subscribe_key)
-        while not self.stop_event.is_set():
-            await self.send('当前时间：')
-            await asyncio.sleep(0.5)
+        pubsub = self.conn.pubsub()
+        pubsub.subscribe(self.subscribe_key)
+        try:
+            while not self.stop_event.is_set():
+                message = pubsub.get_message(timeout=0.1)
+                if message and message['type'] == 'message':
+                    data = message['data'].decode('utf-8')
+                    await self.send(text_data=data)
+                await asyncio.sleep(0.6)
+        finally:
+            pubsub.unsubscribe(self.subscribe_key)

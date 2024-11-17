@@ -40,6 +40,11 @@ message PipRequest {
     string package_name = 1;
 }
 
+message ExtendUpdateRequest {
+    string task_uid = 1;
+    string extend_info = 2;
+}
+
 // 响应消息类型
 message TaskResponse {
     Status status = 1;
@@ -60,4 +65,5 @@ service SpiderNodeService {
     rpc PipInstall (PipRequest) returns (TaskResponse);
     rpc PipUninstall (PipRequest) returns (TaskResponse);
     rpc PipUpdate (PipRequest) returns (TaskResponse);
+    rpc ExtendUpdate (ExtendUpdateRequest) returns (TaskResponse);
 }

@@ -91,6 +91,11 @@ class SpiderNodeServiceStub(object):
                 request_serializer=manager__pb2.PipRequest.SerializeToString,
                 response_deserializer=manager__pb2.TaskResponse.FromString,
                 _registered_method=True)
+        self.ExtendUpdate = channel.unary_unary(
+                '/spider_node.SpiderNodeService/ExtendUpdate',
+                request_serializer=manager__pb2.ExtendUpdateRequest.SerializeToString,
+                response_deserializer=manager__pb2.TaskResponse.FromString,
+                _registered_method=True)
 
 
 class SpiderNodeServiceServicer(object):
@@ -163,6 +168,12 @@ class SpiderNodeServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ExtendUpdate(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SpiderNodeServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -219,6 +230,11 @@ def add_SpiderNodeServiceServicer_to_server(servicer, server):
             'PipUpdate': grpc.unary_unary_rpc_method_handler(
                     servicer.PipUpdate,
                     request_deserializer=manager__pb2.PipRequest.FromString,
+                    response_serializer=manager__pb2.TaskResponse.SerializeToString,
+            ),
+            'ExtendUpdate': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExtendUpdate,
+                    request_deserializer=manager__pb2.ExtendUpdateRequest.FromString,
                     response_serializer=manager__pb2.TaskResponse.SerializeToString,
             ),
     }
@@ -519,6 +535,33 @@ class SpiderNodeService(object):
             target,
             '/spider_node.SpiderNodeService/PipUpdate',
             manager__pb2.PipRequest.SerializeToString,
+            manager__pb2.TaskResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ExtendUpdate(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/spider_node.SpiderNodeService/ExtendUpdate',
+            manager__pb2.ExtendUpdateRequest.SerializeToString,
             manager__pb2.TaskResponse.FromString,
             options,
             channel_credentials,

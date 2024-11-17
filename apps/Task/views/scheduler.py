@@ -306,3 +306,32 @@ class SchedulerPackageView(APIView):
             code=Code.OK,
             msg='Success',
         )
+
+
+class SchedulerTaskExtendView(APIView):
+    """
+    调度任务扩展
+    """
+
+    def get(self, request: Request):
+        task_uid = request.query_params.get('taskUid', '').strip()
+        node_uid = request.query_params.get('nodeUid', '').strip()
+        stat = get_node_conn().get(f'stat:{node_uid}')
+        if not stat:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='节点不存在',
+            )
+        status = json.loads(stat.decode('utf-8'))
+        tasks = list(filter(lambda x: x['taskUid'] == task_uid, status['tasks']))
+        if not tasks:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='任务不存在或数据更新延迟',
+            )
+        data = tasks[0]
+        return CustomResponse(
+            code=Code.OK,
+            msg='Success',
+            data=data['extend']
+        )

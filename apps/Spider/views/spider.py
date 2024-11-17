@@ -21,14 +21,11 @@ class SpiderViewSet(CustomModelViewSet):
     serializer_class = SpiderSerializer
     lookup_field = 'id'
 
-
     def list(self, request: Request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-
     def retrieve(self, request: Request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
-
 
     def create(self, request, *args, **kwargs):
         request.data['founder'] = 1
@@ -41,7 +38,6 @@ class SpiderViewSet(CustomModelViewSet):
         # request.data['founder'] = request.user.uid
         return super().create(request, *args, **kwargs)
 
-
     def update(self, request, *args, **kwargs):
         if 'founder' in request.data:
             del request.data['founder']
@@ -50,7 +46,6 @@ class SpiderViewSet(CustomModelViewSet):
         if 'resources' in request.data:
             del request.data['resources']
         return super().update(request, *args, **kwargs)
-
 
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
@@ -74,7 +69,6 @@ class SpiderOptionViewSet(CustomGenericViewSet, CustomListMixin):
     lookup_field = 'id'
     pagination_class = None
 
-
     def list(self, request: Request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -92,7 +86,6 @@ class SpiderTaskViewSet(CustomGenericViewSet, CustomRetrieveMixin):
     lookup_field = 'id'
     pagination_class = None
 
-
     def retrieve(self, request: Request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -101,7 +94,8 @@ class SpiderTaskViewSet(CustomGenericViewSet, CustomRetrieveMixin):
 
 
 class SpiderPullView(APIView):
-
+    permission_classes = []
+    authentication_classes = []
 
     def get(self, request: Request):
         task_uid = request.query_params.get('taskUid')

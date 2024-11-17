@@ -57,6 +57,14 @@ class PipRequest(_message.Message):
     package_name: str
     def __init__(self, package_name: _Optional[str] = ...) -> None: ...
 
+class ExtendUpdateRequest(_message.Message):
+    __slots__ = ("task_uid", "extend_info")
+    TASK_UID_FIELD_NUMBER: _ClassVar[int]
+    EXTEND_INFO_FIELD_NUMBER: _ClassVar[int]
+    task_uid: str
+    extend_info: str
+    def __init__(self, task_uid: _Optional[str] = ..., extend_info: _Optional[str] = ...) -> None: ...
+
 class TaskResponse(_message.Message):
     __slots__ = ("status", "message", "result")
     STATUS_FIELD_NUMBER: _ClassVar[int]

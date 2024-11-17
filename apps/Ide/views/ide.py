@@ -17,7 +17,6 @@ class IdeApiView(APIView):
     IDE视图
     """
 
-
     def get(self, request: Request):
         resource_id = request.query_params.get('id')
         if not resource_id: return CustomResponse(
@@ -43,7 +42,6 @@ class IdeApiView(APIView):
                 }
             ]
         )
-
 
     def put(self, request: Request):
         path = request.query_params.get('path')
@@ -73,7 +71,6 @@ class IdeApiView(APIView):
             }
         )
 
-
     def post(self, request: Request):
         path = request.data.get('path')
         name = request.data.get('name')
@@ -102,14 +99,15 @@ class IdeApiView(APIView):
             }
         )
 
-
     def delete(self, request: Request):
         path = request.query_params.get('path')
-        resource_path = settings.IDE_RESOURCES / path
         if not path: return CustomResponse(
             code=Code.INVALID_ARGUMENT,
             msg="参数为空"
         )
+        resource_path = settings.IDE_RESOURCES / path
+        if resource_path.parent.name == settings.IDE_RESOURCES.name:
+            return CustomResponse(code=Code.INVALID_ARGUMENT, msg="不能删除根目录")
         if not resource_path.exists():
             return CustomResponse(code=Code.NOT_FOUND, msg="资源不存在")
         if resource_path.is_dir():
@@ -126,7 +124,6 @@ class IdeLazyView(APIView):
     """
     IDE懒加载视图
     """
-
 
     def get(self, request: Request):
         path = request.query_params.get('path')
@@ -159,7 +156,6 @@ class IdeFileView(APIView):
     IDE文件视图
     """
 
-
     def get(self, request: Request):
         path = request.query_params.get('path')
         resource_path = settings.IDE_RESOURCES / path
@@ -189,8 +185,7 @@ class IdeFileView(APIView):
             data=resource_path.read_text(encoding='utf-8')
         )
 
-
-    def post(self, request: Request):
+    def put(self, request: Request):
         path = request.data.get('path')
         content = request.data.get('content')
         resource_path = settings.IDE_RESOURCES / path
@@ -205,6 +200,33 @@ class IdeFileView(APIView):
                 msg="文件类型不支持"
             )
         resource_path.write_text(content.replace('\r\n', '\n'), encoding='utf-8')
+        return CustomResponse(
+            code=Code.OK,
+            msg="Success"
+        )
+
+    def post(self, request: Request):
+        path = request.data.get('path')
+        file = request.FILES.get('file')
+        if not path or not file:
+            return CustomResponse(
+                status=400,
+                code=Code.INVALID_ARGUMENT,
+                msg="参数为空或文件不存在"
+            )
+        resource_path = settings.IDE_RESOURCES / path / file.name
+        if resource_path.exists():
+            return CustomResponse(code=Code.ALREADY_EXISTS, msg="文件已存在")
+        if not is_valid_filename(resource_path.name):
+            return CustomResponse(code=Code.INVALID_ARGUMENT, msg="文件名不合法")
+        if file.size > settings.IDE_MAX_FILE_SIZE:
+            return CustomResponse(code=Code.INVALID_ARGUMENT, msg="文件过大")
+        with resource_path.open('wb') as f:
+            while True:
+                chunk = file.read(1024)
+                print(chunk, '---------------')
+                if not chunk: break
+                f.write(chunk)
         return CustomResponse(
             code=Code.OK,
             msg="Success"

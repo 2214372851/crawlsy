@@ -25,15 +25,15 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmanager.proto\x12\x0bspider_node\x1a\x1bgoogle/protobuf/empty.proto\"%\n\x11TaskStatusRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"5\n\x10TaskStartRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\"%\n\x11TaskDeleteRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"%\n\x11TaskReloadRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"\'\n\x13TaskLogsOpenRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"(\n\x14TaskLogsCloseRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"\"\n\nPipRequest\x12\x14\n\x0cpackage_name\x18\x01 \x01(\t\"T\n\x0cTaskResponse\x12#\n\x06status\x18\x01 \x01(\x0e\x32\x13.spider_node.Status\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0e\n\x06result\x18\x03 \x01(\x0c* \n\x06Status\x12\t\n\x05\x45RROR\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x32\x98\x06\n\x11SpiderNodeService\x12@\n\x0bTasksStatus\x12\x16.google.protobuf.Empty\x1a\x19.spider_node.TaskResponse\x12G\n\nTaskStatus\x12\x1e.spider_node.TaskStatusRequest\x1a\x19.spider_node.TaskResponse\x12\x45\n\tTaskStart\x12\x1d.spider_node.TaskStartRequest\x1a\x19.spider_node.TaskResponse\x12G\n\nTaskDelete\x12\x1e.spider_node.TaskDeleteRequest\x1a\x19.spider_node.TaskResponse\x12G\n\nTaskReload\x12\x1e.spider_node.TaskReloadRequest\x1a\x19.spider_node.TaskResponse\x12K\n\x0cTaskLogsOpen\x12 .spider_node.TaskLogsOpenRequest\x1a\x19.spider_node.TaskResponse\x12M\n\rTaskLogsClose\x12!.spider_node.TaskLogsCloseRequest\x1a\x19.spider_node.TaskResponse\x12<\n\x07PipList\x12\x16.google.protobuf.Empty\x1a\x19.spider_node.TaskResponse\x12@\n\nPipInstall\x12\x17.spider_node.PipRequest\x1a\x19.spider_node.TaskResponse\x12\x42\n\x0cPipUninstall\x12\x17.spider_node.PipRequest\x1a\x19.spider_node.TaskResponse\x12?\n\tPipUpdate\x12\x17.spider_node.PipRequest\x1a\x19.spider_node.TaskResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmanager.proto\x12\x0bspider_node\x1a\x1bgoogle/protobuf/empty.proto\"%\n\x11TaskStatusRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"5\n\x10TaskStartRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\"%\n\x11TaskDeleteRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"%\n\x11TaskReloadRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"\'\n\x13TaskLogsOpenRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"(\n\x14TaskLogsCloseRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\"\"\n\nPipRequest\x12\x14\n\x0cpackage_name\x18\x01 \x01(\t\"<\n\x13\x45xtendUpdateRequest\x12\x10\n\x08task_uid\x18\x01 \x01(\t\x12\x13\n\x0b\x65xtend_info\x18\x02 \x01(\t\"T\n\x0cTaskResponse\x12#\n\x06status\x18\x01 \x01(\x0e\x32\x13.spider_node.Status\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0e\n\x06result\x18\x03 \x01(\x0c* \n\x06Status\x12\t\n\x05\x45RROR\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x32\xe5\x06\n\x11SpiderNodeService\x12@\n\x0bTasksStatus\x12\x16.google.protobuf.Empty\x1a\x19.spider_node.TaskResponse\x12G\n\nTaskStatus\x12\x1e.spider_node.TaskStatusRequest\x1a\x19.spider_node.TaskResponse\x12\x45\n\tTaskStart\x12\x1d.spider_node.TaskStartRequest\x1a\x19.spider_node.TaskResponse\x12G\n\nTaskDelete\x12\x1e.spider_node.TaskDeleteRequest\x1a\x19.spider_node.TaskResponse\x12G\n\nTaskReload\x12\x1e.spider_node.TaskReloadRequest\x1a\x19.spider_node.TaskResponse\x12K\n\x0cTaskLogsOpen\x12 .spider_node.TaskLogsOpenRequest\x1a\x19.spider_node.TaskResponse\x12M\n\rTaskLogsClose\x12!.spider_node.TaskLogsCloseRequest\x1a\x19.spider_node.TaskResponse\x12<\n\x07PipList\x12\x16.google.protobuf.Empty\x1a\x19.spider_node.TaskResponse\x12@\n\nPipInstall\x12\x17.spider_node.PipRequest\x1a\x19.spider_node.TaskResponse\x12\x42\n\x0cPipUninstall\x12\x17.spider_node.PipRequest\x1a\x19.spider_node.TaskResponse\x12?\n\tPipUpdate\x12\x17.spider_node.PipRequest\x1a\x19.spider_node.TaskResponse\x12K\n\x0c\x45xtendUpdate\x12 .spider_node.ExtendUpdateRequest\x1a\x19.spider_node.TaskResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'manager_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_STATUS']._serialized_start=436
-  _globals['_STATUS']._serialized_end=468
+  _globals['_STATUS']._serialized_start=498
+  _globals['_STATUS']._serialized_end=530
   _globals['_TASKSTATUSREQUEST']._serialized_start=59
   _globals['_TASKSTATUSREQUEST']._serialized_end=96
   _globals['_TASKSTARTREQUEST']._serialized_start=98
@@ -48,8 +48,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_TASKLOGSCLOSEREQUEST']._serialized_end=312
   _globals['_PIPREQUEST']._serialized_start=314
   _globals['_PIPREQUEST']._serialized_end=348
-  _globals['_TASKRESPONSE']._serialized_start=350
-  _globals['_TASKRESPONSE']._serialized_end=434
-  _globals['_SPIDERNODESERVICE']._serialized_start=471
-  _globals['_SPIDERNODESERVICE']._serialized_end=1263
+  _globals['_EXTENDUPDATEREQUEST']._serialized_start=350
+  _globals['_EXTENDUPDATEREQUEST']._serialized_end=410
+  _globals['_TASKRESPONSE']._serialized_start=412
+  _globals['_TASKRESPONSE']._serialized_end=496
+  _globals['_SPIDERNODESERVICE']._serialized_start=533
+  _globals['_SPIDERNODESERVICE']._serialized_end=1402
 # @@protoc_insertion_point(module_scope)
