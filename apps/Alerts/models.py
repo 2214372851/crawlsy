@@ -7,8 +7,23 @@ class AlertRuleModel(models.Model):
     """
     name = models.CharField(max_length=50, verbose_name='规则名称', unique=True)
     description = models.TextField(verbose_name='描述')
-    mertric = models.CharField(max_length=50, verbose_name='监控指标')
-    condition = models.CharField(max_length=50, verbose_name='监控条件')
+    mertric_choices = (
+        ('cpu_usage', 'CPU使用率'),
+        ('memory_usage', '内存使用率'),
+        ('sent', '上传带宽'),
+        ('recv', '下载带宽'),
+        ('load', '负载'),
+        ('score', '评分'),
+    )
+    mertric = models.CharField(max_length=50, choices=mertric_choices, verbose_name='监控指标')
+    condition_choices = (
+        ('>', '大于'),
+        ('=', '等于'),
+        ('<', '小于'),
+        ('>=', '大于等于'),
+        ('<=', '小于等于'),
+    )
+    condition = models.CharField(max_length=10, choices=condition_choices, verbose_name='监控条件')
     threshold = models.FloatField(verbose_name='阈值')
     severity_choices = (
         ('critical', '严重'),

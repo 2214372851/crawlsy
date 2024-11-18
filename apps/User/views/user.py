@@ -83,8 +83,8 @@ class UserFeishuView(APIView):
         result = feishu.get_users_id(request.user.email)[request.user.email]
         if not result:
             return CustomResponse(code=Code.NOT_FOUND, msg='请检查当前邮箱是否绑定飞书账号')
-
-        request.user.update(feishu_id=result).save()
+        request.user.feishu_id = result
+        request.user.save()
         return CustomResponse(code=Code.OK, msg='Success')
 
 

@@ -21,11 +21,8 @@ class TaskViewSet(CustomModelViewSet):
     serializer_class = TaskSerializers
     lookup_field = 'id'
 
-
-
     def list(self, request: Request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
 
     def retrieve(self, request: Request, *args, **kwargs):
         instance = self.get_object()
@@ -34,21 +31,17 @@ class TaskViewSet(CustomModelViewSet):
         self.check_object_permissions(request, serializer)
         return CustomResponse(code=Code.OK, msg='Success', data=serializer.data)
 
-
     def create(self, request, *args, **kwargs):
         request.data['founder'] = 1
         # request.data['founder'] = request.user.uid
         return super().create(request, *args, **kwargs)
-
 
     def update(self, request, *args, **kwargs):
         if 'founder' in request.data:
             del request.data['founder']
         return super().update(request, *args, **kwargs)
 
-
     def destroy(self, request, *args, **kwargs):
-        # TODO: 检测并移除所有部署
         return super().destroy(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):

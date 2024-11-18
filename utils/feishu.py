@@ -1,12 +1,11 @@
 import json
 import logging
-from typing import Literal
+from concurrent.futures import ThreadPoolExecutor
 
 from django.utils.datetime_safe import datetime
 from requests import request
 
 from utils.exception import OpenApiException
-from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger('django')
 

@@ -20,6 +20,11 @@ class NodeModel(models.Model):
                 raise ValidationError("This field node_uid cannot be modified.")
         super(NodeModel, self).save(*args, **kwargs)
 
+    def delete(self, using=None, keep_parents=False):
+        if self.taskmodel_set.exists():
+            raise ValidationError("该节点下仍有任务无法删除")
+        return super(NodeModel, self).delete()
+
     class Meta:
         db_table = 'node'
         ordering = ['-createTime']

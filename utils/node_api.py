@@ -2,6 +2,7 @@ import json
 import pickle
 
 import grpc
+from django.conf import settings
 
 from utils.exception import SchedulerException
 from utils.proto import manager_pb2_grpc as pb2c, manager_pb2 as pb2
@@ -33,7 +34,10 @@ class NodeApi:
             )
         )
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.TaskStatus(pb2.TaskStatusRequest(task_uid=task_uid))
+        result = client.TaskStatus(
+            pb2.TaskStatusRequest(task_uid=task_uid),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -43,7 +47,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.TaskDelete(pb2.TaskDeleteRequest(task_uid=task_uid))
+        result = client.TaskDelete(
+            pb2.TaskDeleteRequest(task_uid=task_uid),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -53,7 +60,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.TaskStart(pb2.TaskStartRequest(task_uid=task_uid, command=command))
+        result = client.TaskStart(
+            pb2.TaskStartRequest(task_uid=task_uid, command=command),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -63,7 +73,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.TaskReload(pb2.TaskReloadRequest(task_uid=task_uid))
+        result = client.TaskReload(
+            pb2.TaskReloadRequest(task_uid=task_uid),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -73,7 +86,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.TaskLogsOpen(pb2.TaskLogsOpenRequest(task_uid=str(task_uid)))
+        result = client.TaskLogsOpen(
+            pb2.TaskLogsOpenRequest(task_uid=str(task_uid)),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -83,7 +99,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.TaskLogsClose(pb2.TaskLogsCloseRequest(task_uid=str(task_uid)))
+        result = client.TaskLogsClose(
+            pb2.TaskLogsCloseRequest(task_uid=str(task_uid)),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -91,9 +110,14 @@ class NodeApi:
 
     def node_pip_list(self, conn, node_uid):
         service = self._get_service(conn, node_uid)
-        channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
+        channel = grpc.insecure_channel(
+            '{}:{}'.format(service.get('node_host'), service.get('node_port')),
+        )
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.PipList(pb2.PipRequest())
+        result = client.PipList(
+            pb2.PipRequest(),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -103,7 +127,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.PipInstall(pb2.PipRequest(package_name=package_name))
+        result = client.PipInstall(
+            pb2.PipRequest(package_name=package_name),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -113,7 +140,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.PipUninstall(pb2.PipRequest(package_name=package_name))
+        result = client.PipUninstall(
+            pb2.PipRequest(package_name=package_name),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)
@@ -123,7 +153,10 @@ class NodeApi:
         service = self._get_service(conn, node_uid)
         channel = grpc.insecure_channel('{}:{}'.format(service.get('node_host'), service.get('node_port')))
         client = pb2c.SpiderNodeServiceStub(channel)
-        result = client.PipUpdate(pb2.PipRequest(package_name=package_name))
+        result = client.PipUpdate(
+            pb2.PipRequest(package_name=package_name),
+            metadata=(('secret', settings.SECRET_KEY),)
+        )
         status = result.status
         message = result.message
         result = self._load(result.result)

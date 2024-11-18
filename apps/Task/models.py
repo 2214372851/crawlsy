@@ -21,6 +21,12 @@ class TaskModel(models.Model):
     createTime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
+    def delete(self, using=None, keep_parents=False):
+        nodes = self.taskNodes.all()
+        if nodes:
+            raise ValueError('请移除节点后删除')
+        super().delete()
+
     class Meta:
         db_table = 'task'
         ordering = ['-createTime']

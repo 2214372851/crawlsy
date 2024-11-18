@@ -36,11 +36,11 @@ INSTALLED_APPS = [
     # 'django.contrib.sessions',
     # 'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'rest_framework',
     'corsheaders',
     'drf_spectacular',
     'channels',
+    'django_celery_beat',
     'apps.User',
     'apps.Node',
     'apps.Task',
@@ -268,8 +268,10 @@ IDE_MAX_FILE_SIZE = 1024 * 1024 * 10
 IDE_TEMP = IDE_ROOT / 'spider_temp'
 
 # Celery
-CELERY_BROKER_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/5'
+CELERY_BROKER_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
 CELERY_RESULT_BACKEND = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
+CELWRY_WORKER_CONCURRENCY = 1
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 50
 
 # Node Service
 NODE_SERVICE_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/3'

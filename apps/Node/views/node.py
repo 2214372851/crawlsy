@@ -2,7 +2,6 @@
 唯一识别根据redis中 keys * 值添加在线节点， 子节点每60s同步一次状态
 """
 
-
 from rest_framework import routers
 from rest_framework.views import Request
 
@@ -21,10 +20,8 @@ class NodeViewSet(CustomModelViewSet):
     serializer_class = NodeSerializer
     lookup_field = 'id'
 
-
     def list(self, request: Request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
 
     def retrieve(self, request: Request, *args, **kwargs):
         instance = self.get_object()
@@ -33,18 +30,14 @@ class NodeViewSet(CustomModelViewSet):
         self.check_object_permissions(request, serializer)
         return CustomResponse(code=Code.OK, msg='Success', data=serializer.data)
 
-
     def create(self, request, *args, **kwargs):
 
         return super().create(request, *args, **kwargs)
 
-
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
-
     def destroy(self, request, *args, **kwargs):
-        # TODO：删除节点前，检查节点下是否有任务
         return super().destroy(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):
@@ -64,7 +57,6 @@ class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
     lookup_field = 'id'
     pagination_class = None
 
-
     def list(self, request: Request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -73,6 +65,7 @@ class NodeOptionViewSet(CustomGenericViewSet, CustomListMixin):
         name = self.request.query_params.get('name', None)
         if name: filter_data = filter_data.filter(name__icontains=name)
         filter_data = filter_data.filter(status=True)
+        # TODO: 返回分数 和 节点状态
         return filter_data
 
 

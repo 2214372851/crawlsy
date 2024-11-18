@@ -28,14 +28,12 @@ class SpiderViewSet(CustomModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        request.data['founder'] = 1
         spider_uid = uuid4()
         request.data['spiderUid'] = spider_uid
-        # TODO: 为爬虫创建项目文件夹
         resources = settings.IDE_RESOURCES / str(spider_uid)
         resources.mkdir(parents=True)
         request.data['resources'] = str(resources)
-        # request.data['founder'] = request.user.uid
+        request.data['founder'] = request.user.id
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
@@ -99,20 +97,29 @@ class SpiderPullView(APIView):
 
     def get(self, request: Request):
         task_uid = request.query_params.get('taskUid')
-        spider = TaskModel.objects.filter(taskUid=task_uid).first()
-        if not spider:
+        secret_key = request.META.get('HTTP_SECRET')
+        if not secret_key:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg='未携带身份信息'
+            )
+        if not task_uid:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg='参数错误'
+            )
+        if secret_key != settings.SECRET_KEY:
+            return CustomResponse(
+                code=Code.INVALID_ARGUMENT,
+                msg='身份信息错误'
+            )
+        task = TaskModel.objects.filter(taskUid=task_uid).first()
+        if not task:
             return CustomResponse(
                 code=Code.NOT_FOUND,
-                msg='爬虫不存在'
+                msg='任务不存在'
             )
-        spider_uid = str(spider.taskSpider.spiderUid)
-        # TODO: 校验token
-        # token = request.query_params.get('token')
-        # if not spider_uid or not token:
-        #     return CustomResponse(
-        #         code=Code.INVALID_ARGUMENT,
-        #         msg='参数错误'
-        #     )
+        spider_uid = str(task.taskSpider.spiderUid)
         project_path = settings.IDE_RESOURCES / spider_uid
         if not project_path.exists():
             return CustomResponse(
@@ -122,10 +129,10 @@ class SpiderPullView(APIView):
         temp_path = settings.IDE_TEMP / f'{spider_uid}.zip'
         temp_path.parent.mkdir(exist_ok=True, parents=True)
         zip(file_path=project_path, zip_filename=temp_path)
-        if temp_path.stat().st_size > 1024 * 1024 * 20:
+        if temp_path.stat().st_size > settings.IDE_MAX_FILE_SIZE:
             return CustomResponse(
                 code=Code.FAILED_PRECONDITION,
-                msg='文件过大，请压缩后再下载'
+                msg='文件过大超过阈值'
             )
         zip_file = open(temp_path, 'rb')
         response = FileResponse(zip_file, content_type='application/zip')

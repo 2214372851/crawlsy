@@ -1,11 +1,17 @@
 import json
+import logging
 
+import pytz
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from rest_framework import serializers
-from apps.Task.models import TaskModel
+
 from apps.Node.models import NodeModel
+from apps.Task.models import TaskModel
 from utils.date import validate_cron
 from utils.node_stat import get_node_conn
 from utils.status import Status
+
+logger = logging.getLogger('django')
 
 
 class TaskSerializers(serializers.ModelSerializer):
@@ -44,12 +50,54 @@ class TaskSerializers(serializers.ModelSerializer):
                     {'cronExpression': 'cron表达式不符合规范'})
         return attrs
 
+    def update(self, instance: TaskModel, validated_data):
+        if validated_data.get('status') and validated_data.get('isTiming'):
+            PeriodicTask.objects.filter(name=instance.name).delete()
+            # 解析 cron 表达式
+            parts = validated_data['cronExpression'].split()
+            minute, hour, day_of_month, month_of_year, day_of_week = parts
+            schedule, _ = CrontabSchedule.objects.get_or_create(
+                minute=minute,
+                hour=hour,
+                day_of_week=day_of_month,
+                day_of_month=month_of_year,
+                month_of_year=day_of_week,
+                timezone=pytz.timezone('Asia/Shanghai')
+            )
+            PeriodicTask.objects.update_or_create(
+                name=validated_data['name'],
+                crontab=schedule,
+                task='task_celery.node_status.tasks.task_start',
+                args=json.dumps([str(instance.taskUid)]),
+            )
+            logger.info('定时任务创建成功')
+        else:
+            if instance.status and instance.isTiming:
+                PeriodicTask.objects.filter(name=instance.name).delete()
+                logger.info('定时任务删除成功')
+        if instance.taskNodes.count() > 0 and [i.id for i in instance.taskNodes.all()] != list(
+                validated_data['taskNodes']):
+            conn = get_node_conn()
+            flag = True
+            for node in instance.taskNodes.all():
+                service = conn.get(f"stat:{node.nodeUid}")
+                if service is None: continue
+                service = json.loads(service.decode('utf-8'))
+                running_taks = {i['taskUid']: i['status'] for i in service['tasks']}
+                if running_taks.get(str(node.taskUid), Status.NOT_EXIST.value) != Status.NOT_EXIST.value:
+                    flag = False
+                    break
+            if not flag:
+                raise ValueError('节点仍在占用请先取消部署')
+
+            logger.info('任务节点修改成功')
+        return super().update(instance, validated_data)
+
     class Meta:
         model = TaskModel
         fields = '__all__'
         extra_kwargs = {
-            'founder': {'write_only': True},
-            'status': {'read_only': True},
+            'founder': {'write_only': True}
         }
 
 

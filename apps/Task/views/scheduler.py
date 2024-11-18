@@ -125,8 +125,15 @@ class SchedulerView(APIView):
                 msg='任务不存在',
             )
         if task.isTiming:
-            # TODO: 定时任务特殊处理
-            pass
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='定时任务无法部署',
+            )
+        if not task.status:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='任务状态为不可用',
+            )
         nodes = task.taskNodes.all()
         if not nodes:
             return CustomResponse(
@@ -164,15 +171,22 @@ class SchedulerView(APIView):
         重新部署任务
         """
         task_uid = request.query_params.get('taskUid')
-        task = TaskModel.objects.filter(taskUid=task_uid).first()
+        task: TaskModel = TaskModel.objects.filter(taskUid=task_uid).first()
         if not task:
             return CustomResponse(
                 code=Code.NOT_FOUND,
                 msg='任务不存在',
             )
         if task.isTiming:
-            # TODO: 定时任务特殊处理
-            pass
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='定时任务无法重新部署',
+            )
+        if not task.status:
+            return CustomResponse(
+                code=Code.NOT_FOUND,
+                msg='任务状态为不可用',
+            )
         nodes = task.taskNodes.all()
         if not nodes:
             return CustomResponse(

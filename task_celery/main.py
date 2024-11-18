@@ -1,11 +1,10 @@
 import os
+import sys
+from datetime import timedelta
+from pathlib import Path
 
 import django
 from celery import Celery
-from pathlib import Path
-import sys
-from datetime import timedelta
-from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
@@ -18,18 +17,16 @@ django.setup()
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks([
-    'task_celery.node_status'
+    'task_celery.node_status',
+    'task_celery.task_start'
 ])
 
-app.conf.beat_schedule = {
-    'add-every-10-seconds': {
-        'task': 'task_celery.node_status.tasks.node_detection',
-        # 每6秒执行一次
-        'schedule': 12,
-        # 每年4月11如8点42分执行
-        # 'schedule':crontab(minute=42, hour=8, day_of_month=11, month_of_year=4)
-        # 'args': ('云海',)
-    }
-}
+app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
+# app.conf.beat_schedule = {
+#     'node-heartbeat-12-seconds': {
+#         'task': 'task_celery.node_status.tasks.node_detection',
+#         'schedule': timedelta(seconds=12),
+#     }
+# }
 # 定时 celery -A task_celery.main beat -l info
 # 消费 celery -A task_celery.main worker --loglevel=info -P eventlet
