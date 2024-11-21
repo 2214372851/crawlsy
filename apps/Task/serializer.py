@@ -8,6 +8,7 @@ from rest_framework import serializers
 from apps.Node.models import NodeModel
 from apps.Task.models import TaskModel
 from utils.date import validate_cron
+from utils.node_api import NodeApi
 from utils.node_stat import get_node_conn
 from utils.status import Status
 
@@ -83,8 +84,8 @@ class TaskSerializers(serializers.ModelSerializer):
                 service = conn.get(f"stat:{node.nodeUid}")
                 if service is None: continue
                 service = json.loads(service.decode('utf-8'))
-                running_taks = {i['taskUid']: i['status'] for i in service['tasks']}
-                if running_taks.get(str(node.taskUid), Status.NOT_EXIST.value) != Status.NOT_EXIST.value:
+                running_task = {i['taskUid']: i['status'] for i in service['tasks']}
+                if running_task.get(str(instance.taskUid), Status.NOT_EXIST.value) != Status.NOT_EXIST.value:
                     flag = False
                     break
             if not flag:
@@ -132,11 +133,11 @@ class TaskDetailSerializers(TaskSerializers):
                 })
                 continue
             service = json.loads(service.decode('utf-8'))
-            running_taks = {i['taskUid']: i['status'] for i in service['tasks']}
+            running_task = {i['taskUid']: i['status'] for i in service['tasks']}
             result.append({
                 'id': node.id,
                 'name': node.name,
                 'nodeUid': node.nodeUid,
-                'status': running_taks.get(str(obj.taskUid), Status.NOT_EXIST),
+                'status': running_task.get(str(obj.taskUid), Status.NOT_EXIST),
             })
         return result

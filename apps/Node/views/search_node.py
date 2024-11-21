@@ -13,7 +13,6 @@ class SearchNodeView(APIView):
     节点发现视图
     """
 
-
     def get(self, request: Request):
         exclude_nodes = {node.nodeUid for node in NodeModel.objects.all()}
         conn = get_node_conn()
