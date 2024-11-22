@@ -8,7 +8,6 @@ from rest_framework import serializers
 from apps.Node.models import NodeModel
 from apps.Task.models import TaskModel
 from utils.date import validate_cron
-from utils.node_api import NodeApi
 from utils.node_stat import get_node_conn
 from utils.status import Status
 

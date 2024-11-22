@@ -22,9 +22,7 @@ class TaskModel(models.Model):
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
     def delete(self, using=None, keep_parents=False):
-        nodes = self.taskNodes.all()
-        if nodes:
-            raise ValueError('请移除节点后删除')
+        self.taskNodes.clear()
         super().delete()
 
     class Meta:
