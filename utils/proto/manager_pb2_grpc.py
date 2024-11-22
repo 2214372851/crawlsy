@@ -96,6 +96,11 @@ class SpiderNodeServiceStub(object):
                 request_serializer=manager__pb2.ExtendUpdateRequest.SerializeToString,
                 response_deserializer=manager__pb2.TaskResponse.FromString,
                 _registered_method=True)
+        self.ResultWrite = channel.unary_unary(
+                '/spider_node.SpiderNodeService/ResultWrite',
+                request_serializer=manager__pb2.ResultWriteRequest.SerializeToString,
+                response_deserializer=manager__pb2.TaskResponse.FromString,
+                _registered_method=True)
 
 
 class SpiderNodeServiceServicer(object):
@@ -174,6 +179,12 @@ class SpiderNodeServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ResultWrite(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SpiderNodeServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -235,6 +246,11 @@ def add_SpiderNodeServiceServicer_to_server(servicer, server):
             'ExtendUpdate': grpc.unary_unary_rpc_method_handler(
                     servicer.ExtendUpdate,
                     request_deserializer=manager__pb2.ExtendUpdateRequest.FromString,
+                    response_serializer=manager__pb2.TaskResponse.SerializeToString,
+            ),
+            'ResultWrite': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResultWrite,
+                    request_deserializer=manager__pb2.ResultWriteRequest.FromString,
                     response_serializer=manager__pb2.TaskResponse.SerializeToString,
             ),
     }
@@ -562,6 +578,33 @@ class SpiderNodeService(object):
             target,
             '/spider_node.SpiderNodeService/ExtendUpdate',
             manager__pb2.ExtendUpdateRequest.SerializeToString,
+            manager__pb2.TaskResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResultWrite(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/spider_node.SpiderNodeService/ResultWrite',
+            manager__pb2.ResultWriteRequest.SerializeToString,
             manager__pb2.TaskResponse.FromString,
             options,
             channel_credentials,

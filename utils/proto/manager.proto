@@ -45,6 +45,11 @@ message ExtendUpdateRequest {
     string extend_info = 2;
 }
 
+message ResultWriteRequest {
+    string task_uid = 1;
+    bytes result_data = 3;
+}
+
 // 响应消息类型
 message TaskResponse {
     Status status = 1;
@@ -66,4 +71,5 @@ service SpiderNodeService {
     rpc PipUninstall (PipRequest) returns (TaskResponse);
     rpc PipUpdate (PipRequest) returns (TaskResponse);
     rpc ExtendUpdate (ExtendUpdateRequest) returns (TaskResponse);
+    rpc ResultWrite (ResultWriteRequest) returns (TaskResponse);
 }

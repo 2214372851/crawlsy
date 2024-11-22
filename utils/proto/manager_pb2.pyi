@@ -65,6 +65,14 @@ class ExtendUpdateRequest(_message.Message):
     extend_info: str
     def __init__(self, task_uid: _Optional[str] = ..., extend_info: _Optional[str] = ...) -> None: ...
 
+class ResultWriteRequest(_message.Message):
+    __slots__ = ("task_uid", "result_data")
+    TASK_UID_FIELD_NUMBER: _ClassVar[int]
+    RESULT_DATA_FIELD_NUMBER: _ClassVar[int]
+    task_uid: str
+    result_data: bytes
+    def __init__(self, task_uid: _Optional[str] = ..., result_data: _Optional[bytes] = ...) -> None: ...
+
 class TaskResponse(_message.Message):
     __slots__ = ("status", "message", "result")
     STATUS_FIELD_NUMBER: _ClassVar[int]
