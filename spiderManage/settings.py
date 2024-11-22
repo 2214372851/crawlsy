@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,11 +92,11 @@ ASGI_APPLICATION = 'spiderManage.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SpiderManage',
-        'USER': 'SpiderManage',
-        'PASSWORD': 'hYJmTmt422KYzEde',
-        'HOST': '8.153.17.121',
-        'PORT': '3306',
+        'NAME': os.getenv('MYSQL_DB_NAME'),
+        'USER': os.getenv('MYSQL_DB_USER'),
+        'PASSWORD': os.getenv('MYSQL_DB_PASSWORD'),
+        'HOST': os.getenv('MYSQL_DB_HOST'),
+        'PORT': os.getenv('MYSQL_DB_PORT'),
     }
 }
 
@@ -140,21 +143,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:redis_pCd7ts@8.153.17.121:6379/0",
+        "LOCATION": os.getenv('DEFAULT_REDIS_URL'),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "access_token": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:redis_pCd7ts@8.153.17.121:6379/1",
+        "LOCATION": os.getenv('ACCESS_TOKEN_REDIS_URL'),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "refresh_token": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:redis_pCd7ts@8.153.17.121:6379/2",
+        "LOCATION": os.getenv('REFRESH_TOKEN_REDIS_URL'),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -187,11 +190,11 @@ REST_FRAMEWORK = {
     # 匿名用户与认证设置为None
     "UNAUTHENTICATED_USER": None,
     "UNAUTHENTICATED_TOKEN": None,
-    'DEFAULT_AUTHENTICATION_CLASSES': ['utils.auth.CustomLoginAuth', ],
-    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'utils.auth.CustomPermission',
-    ]
+    # 'DEFAULT_AUTHENTICATION_CLASSES': ['utils.auth.CustomLoginAuth', ],
+    # 'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'utils.auth.CustomPermission',
+    # ]
 }
 
 # Swagger
@@ -268,18 +271,22 @@ IDE_MAX_FILE_SIZE = 1024 * 1024 * 10
 IDE_TEMP = IDE_ROOT / 'spider_temp'
 
 # Celery
-CELERY_BROKER_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
-CELERY_RESULT_BACKEND = 'redis://:redis_pCd7ts@8.153.17.121:6379/4'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 CELWRY_WORKER_CONCURRENCY = 1
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 50
 
 # Node Service
-NODE_SERVICE_URL = 'redis://:redis_pCd7ts@8.153.17.121:6379/3'
+NODE_SERVICE_URL = os.getenv('NODE_SERVICE_URL')
+
+# MongoDB
+MONGO_URL = os.getenv('MONGO_URL')
+MONGO_DB = os.getenv('MONGO_DB')
 
 # 飞书webhook
 # 应用需要开头以下权限 im:message:send_as_bot,im:message,contact:user.employee_id:readonly,contact:user.id:readonly
 # 消息推送卡片配置 https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/send-feishu-cards-with-app-bots
-APP_ID = 'cli_a7b2a9e17f3dd013'
-APP_SECRET = '4PC9uWLh1mS4LFl1qvIpFfFUqRfnokWi'
-CARD_ID = 'AAqjOpHhoYR3F'
-CARD_VERSION = '0.0.7'
+APP_ID = os.getenv('FEISHU_APP_ID')
+APP_SECRET = os.getenv('FEISHU_APP_SECRET')
+CARD_ID = os.getenv('FEISHU_CARD_ID')
+CARD_VERSION = os.getenv('FEISHU_CARD_VERSION')
