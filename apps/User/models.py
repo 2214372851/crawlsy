@@ -100,3 +100,22 @@ class MenuModel(models.Model):
         verbose_name_plural = verbose_name
         ordering = ['-createTime']
         unique_together = ('name', 'path',)
+
+
+class UserOperationLog(models.Model):
+    """
+    用户操作日志模型
+    """
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('UserModel', on_delete=models.SET_NULL, null=True, verbose_name='操作用户')
+    operation_type = models.CharField(max_length=32, verbose_name='操作类型')
+    description = models.TextField(verbose_name='操作描述')
+    ip_address = models.GenericIPAddressField(verbose_name='IP地址')
+    operation_time = models.DateTimeField(auto_now_add=True, verbose_name='操作时间')
+    status = models.BooleanField(default=True, verbose_name='操作结果')
+
+    class Meta:
+        db_table = 'user_operation_log'
+        verbose_name = '用户操作日志'
+        verbose_name_plural = verbose_name
+        ordering = ['-operation_time']

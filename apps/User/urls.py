@@ -1,6 +1,10 @@
 from django.urls import path, include
 
-from apps.User.views import user, login, role, permission, menu
+from apps.User.views import user, login, role, permission, menu, operation_log
+
+# 创建操作日志路由
+# log_router = DefaultRouter()
+# log_router.register(r'operation-logs', operation_log.UserOperationLogViewSet)
 
 urlpatterns = [
     path('login/', login.LoginView.as_view(), name='login'),
@@ -14,5 +18,5 @@ urlpatterns += [
     path('', include(role.router.urls), name='RoleManage'),
     path('', include(permission.router.urls), name='PermissionManage'),
     path('', include(menu.router.urls), name='MenuManage'),
-
+    path('', include(operation_log.router.urls), name='OperationLogManage'),
 ]

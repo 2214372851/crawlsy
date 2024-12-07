@@ -47,7 +47,7 @@ message ExtendUpdateRequest {
 
 message ResultWriteRequest {
     string task_uid = 1;
-    bytes result_data = 3;
+    string result_data = 3;
 }
 
 // 响应消息类型

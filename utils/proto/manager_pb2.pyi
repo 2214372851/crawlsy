@@ -70,8 +70,8 @@ class ResultWriteRequest(_message.Message):
     TASK_UID_FIELD_NUMBER: _ClassVar[int]
     RESULT_DATA_FIELD_NUMBER: _ClassVar[int]
     task_uid: str
-    result_data: bytes
-    def __init__(self, task_uid: _Optional[str] = ..., result_data: _Optional[bytes] = ...) -> None: ...
+    result_data: str
+    def __init__(self, task_uid: _Optional[str] = ..., result_data: _Optional[str] = ...) -> None: ...
 
 class TaskResponse(_message.Message):
     __slots__ = ("status", "message", "result")

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -22,81 +23,82 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6wdw3s$j5$^a*f%2tn0bqrrit=b2_pxqo4^()usrr=a0^dpgka'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
 INSTALLED_APPS = [
     "daphne",
     # 'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
     # 'django.contrib.sessions',
     # 'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'drf_spectacular',
-    'channels',
-    'django_celery_beat',
-    'apps.User',
-    'apps.Node',
-    'apps.Task',
-    'apps.Spider',
-    'apps.Ide',
-    'apps.Alerts',
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    "drf_spectacular",
+    "channels",
+    "django_celery_beat",
+    "apps.User",
+    "apps.Node",
+    "apps.Task",
+    "apps.Spider",
+    "apps.Ide",
+    "apps.Alerts",
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     # 'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'django.contrib.messages.middleware.MessageMiddleware',
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "utils.middleware.UserOperationLogMiddleware",  # 添加用户操作日志中间件
 ]
 
-ROOT_URLCONF = 'spiderManage.urls'
+ROOT_URLCONF = "spiderManage.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'spiderManage.wsgi.application'
+WSGI_APPLICATION = "spiderManage.wsgi.application"
 
 # django-channels
-ASGI_APPLICATION = 'spiderManage.asgi.application'
+ASGI_APPLICATION = "spiderManage.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQL_DB_NAME'),
-        'USER': os.getenv('MYSQL_DB_USER'),
-        'PASSWORD': os.getenv('MYSQL_DB_PASSWORD'),
-        'HOST': os.getenv('MYSQL_DB_HOST'),
-        'PORT': os.getenv('MYSQL_DB_PORT'),
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("MYSQL_DB_NAME"),
+        "USER": os.getenv("MYSQL_DB_USER"),
+        "PASSWORD": os.getenv("MYSQL_DB_PASSWORD"),
+        "HOST": os.getenv("MYSQL_DB_HOST"),
+        "PORT": os.getenv("MYSQL_DB_PORT"),
     }
 }
 
@@ -105,25 +107,25 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'zh-hans'
+LANGUAGE_CODE = "zh-hans"
 
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
@@ -132,46 +134,46 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Cache
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('DEFAULT_REDIS_URL'),
+        "LOCATION": os.getenv("DEFAULT_REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        },
     },
     "access_token": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('ACCESS_TOKEN_REDIS_URL'),
+        "LOCATION": os.getenv("ACCESS_TOKEN_REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        },
     },
     "refresh_token": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('REFRESH_TOKEN_REDIS_URL'),
+        "LOCATION": os.getenv("REFRESH_TOKEN_REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
+        },
+    },
 }
 
 # Password hasher
 PASSWORD_HASHERS = {
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher'
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
 }
 
 # JWT
-TOKEN_ISS = 'SpiderStudio-ISS@2024'
+TOKEN_ISS = "SpiderStudio-ISS@2024"
 REFRESH_TOKEN_OUT_TIME = 60 * 60 * 24
 ACCESS_TOKEN_OUT_TIME = 60
 
@@ -179,32 +181,34 @@ ACCESS_TOKEN_OUT_TIME = 60
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = ["*"]  # 配置允许的请求方式
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ['*']
+CORS_ALLOW_HEADERS = ["*"]
 
 # REST
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler',
-    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.CustomPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "EXCEPTION_HANDLER": "utils.exception_handler.custom_exception_handler",
+    "DEFAULT_PAGINATION_CLASS": "utils.pagination.CustomPagination",
+    "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # 匿名用户与认证设置为None
     "UNAUTHENTICATED_USER": None,
     "UNAUTHENTICATED_TOKEN": None,
-    # 'DEFAULT_AUTHENTICATION_CLASSES': ['utils.auth.CustomLoginAuth', ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "utils.auth.CustomLoginAuth",
+    ],
     # 'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'utils.auth.CustomPermission',
-    # ]
+    "DEFAULT_PERMISSION_CLASSES": [
+        "utils.auth.CustomPermission",
+    ],
 }
 
 # Swagger
 SPECTACULAR_SETTINGS = {
-    'TITLE': '爬虫管理平台API',
-    'DESCRIPTION': '爬虫管理平台API文档',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "爬虫管理平台API",
+    "DESCRIPTION": "爬虫管理平台API文档",
+    "SERVE_INCLUDE_SCHEMA": False,
     # 'SCHEMA_PATH_PREFIX': None,
     # 或者如果有统一的前缀，可以设置成
-    'SCHEMA_PATH_PREFIX': '/api/V1/',
+    "SCHEMA_PATH_PREFIX": "/api/V1/",
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
         "persistAuthorization": True,
@@ -213,23 +217,23 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Log
-LOGGING_PATH = BASE_DIR / 'log' / 'SpiderStudio.log'
+LOGGING_PATH = BASE_DIR / "log" / "SpiderStudio.log"
 LOGGING_PATH.parent.mkdir(exist_ok=True)
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,  # 设置已存在的logger不失效
-    'filters': {},
-    'formatters': {
-        'standard': {
-            'format': '[%(asctime)s][%(levelname)s][%(filename)s:%(lineno)d:%(funcName)s]：%(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+    "version": 1,
+    "disable_existing_loggers": False,  # 设置已存在的logger不失效
+    "filters": {},
+    "formatters": {
+        "standard": {
+            "format": "[%(asctime)s][%(levelname)s][%(filename)s:%(lineno)d:%(funcName)s]：%(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'simple': {
-            'format': '[%(asctime)s][%(levelname)s]：%(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        }
+        "simple": {
+            "format": "[%(asctime)s][%(levelname)s]：%(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
     },
-    'handlers': {
+    "handlers": {
         # 'email_handler': {
         #     'level': 'ERROR',
         #     'class': 'logging.handlers.SMTPHandler',
@@ -240,53 +244,56 @@ LOGGING = {
         #     'subject': 'SERVER错误',
         #     'credentials': (EMAIL_HOST_USER, EMAIL_HOST_PASSWORD),
         # },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
-        'default': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGGING_PATH,
-            'maxBytes': 1024 * 1024 * 20,  # 日志大小20M
-            'backupCount': 5,
-            'formatter': 'standard',
-            'encoding': 'utf-8',
+        "default": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGGING_PATH,
+            "maxBytes": 1024 * 1024 * 20,  # 日志大小20M
+            "backupCount": 5,
+            "formatter": "standard",
+            "encoding": "utf-8",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'default', ],  # 'email_handler'],
-            'level': 'INFO',
-            'propagate': True
+    "loggers": {
+        "django": {
+            "handlers": [
+                "console",
+                "default",
+            ],  # 'email_handler'],
+            "level": "INFO",
+            "propagate": True,
         }
     },
 }
 
 # Ide resources
-IDE_ROOT = Path('/data')
-IDE_RESOURCES = IDE_ROOT / 'spider_project'
+IDE_ROOT = Path("/data")
+IDE_RESOURCES = IDE_ROOT / "spider_project"
 IDE_MAX_FILE_SIZE = 1024 * 1024 * 10
-IDE_TEMP = IDE_ROOT / 'spider_temp'
+IDE_TEMP = IDE_ROOT / "spider_temp"
 
 # Celery
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELWRY_WORKER_CONCURRENCY = 1
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 50
 
 # Node Service
-NODE_SERVICE_URL = os.getenv('NODE_SERVICE_URL')
+NODE_SERVICE_URL = os.getenv("NODE_SERVICE_URL")
 
 # MongoDB
-MONGO_URL = os.getenv('MONGO_URL')
-MONGO_DB = os.getenv('MONGO_DB')
+MONGO_URL = os.getenv("MONGO_URL")
+MONGO_DB = os.getenv("MONGO_DB")
 
 # 飞书webhook
 # 应用需要开头以下权限 im:message:send_as_bot,im:message,contact:user.employee_id:readonly,contact:user.id:readonly
 # 消息推送卡片配置 https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/send-feishu-cards-with-app-bots
-APP_ID = os.getenv('FEISHU_APP_ID')
-APP_SECRET = os.getenv('FEISHU_APP_SECRET')
-CARD_ID = os.getenv('FEISHU_CARD_ID')
-CARD_VERSION = os.getenv('FEISHU_CARD_VERSION')
+APP_ID = os.getenv("FEISHU_APP_ID")
+APP_SECRET = os.getenv("FEISHU_APP_SECRET")
+CARD_ID = os.getenv("FEISHU_CARD_ID")
+CARD_VERSION = os.getenv("FEISHU_CARD_VERSION")
