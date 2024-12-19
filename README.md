@@ -197,7 +197,7 @@ CORS_ALLOW_HEADERS=*
 
 ## 3. 架构设计
 
-![架构图](docs/images/architecture.svg)
+![架构图](docs/images/architecture.jpeg)
 
 前端应用与主节点（Django Backend）交互，主节点负责与 MongoDB、Redis、MySQL 和工作节点进行通信。主节点和工作节点之间通过 gRPC 框架相互通信。任务由主节点中的 Celery Beat 模块进行调度，并通过 Redis 消息队列分发到工作节点，这些任务在工作节点的运行器中执行。爬虫运行器在执行过程中，通过集成的 gRPC 将采集到的数据直接写入 MongoDB，同时任务状态通过 Celery Worker 更新到 MySQL 中。
 
