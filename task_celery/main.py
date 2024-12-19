@@ -29,4 +29,4 @@ app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
 #     }
 # }
 # 定时 celery -A task_celery.main beat -l info
-# 消费 celery -A task_celery.main worker --loglevel=info -P eventlet
+# 消费 celery -A task_celery.main worker -l info -P eventlet

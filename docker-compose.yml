@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./log:/app/log
+      - spider_data:/data
+    environment:
+      - SECRET_KEY=your-secret-key
+      - TOKEN_ISS=SpiderStudio-ISS@2024
+      - REFRESH_TOKEN_OUT_TIME=86400
+      - ACCESS_TOKEN_OUT_TIME=60
+      - CELERY_BROKER_URL=redis://redis:6379/4
+      - CELERY_RESULT_BACKEND=redis://redis:6379/4
+      - MYSQL_DB_HOST=mysql
+      - MYSQL_DB_PORT=3306
+      - MYSQL_DB_NAME=SpiderManage
+      - MYSQL_DB_USER=SpiderManage
+      - MYSQL_DB_PASSWORD=your-password
+      - DEFAULT_REDIS_URL=redis://redis:6379/0
+      - ACCESS_TOKEN_REDIS_URL=redis://redis:6379/1
+      - REFRESH_TOKEN_REDIS_URL=redis://redis:6379/2
+      - NODE_SERVICE_URL=redis://redis:6379/3
+      - MONGO_URL=mongodb://mongoroot:password@mongo:27017/
+      - MONGO_DB=SpiderManage
+      - FEISHU_APP_ID=your-app-id
+      - FEISHU_APP_SECRET=your-app-secret
+      - FEISHU_CARD_ID=your-card-id
+      - FEISHU_CARD_VERSION=0.0.7
+      - DEBUG=false
+      - IDE_MAX_FILE_SIZE=10485760
+      - CELERY_WORKER_CONCURRENCY=1
+      - CELERY_WORKER_MAX_TASKS_PER_CHILD=50
+      - PAGE_SIZE=10
+      - CORS_ORIGIN_ALLOW_ALL=true
+      - CORS_ALLOW_METHODS=*
+      - CORS_ALLOW_CREDENTIALS=true
+      - CORS_ALLOW_HEADERS=*
+    depends_on:
+      - redis
+      - mysql
+      - mongo
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mysql:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=root-password
+      - MYSQL_DATABASE=SpiderManage
+      - MYSQL_USER=SpiderManage
+      - MYSQL_PASSWORD=your-password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  mongo:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoroot
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  spider_data:  # IDE相关的数据
+  redis_data:   # Redis数据
+  mysql_data:   # MySQL数据
+  mongo_data:   # MongoDB数据
