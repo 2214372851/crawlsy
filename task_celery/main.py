@@ -11,7 +11,7 @@ sys.path.append(str(BASE_DIR))
 
 app = Celery('django_celery')
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'spiderManage.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crawlsy.settings')
 
 django.setup()
 app.config_from_object('django.conf:settings', namespace='CELERY')

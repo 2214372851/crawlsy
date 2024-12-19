@@ -174,7 +174,7 @@ class FeishuApi:
 
 
 if __name__ == '__main__':
-    from spiderManage import settings
+    from crawlsy import settings
 
     fs = FeishuApi('cli_a7b2a9e17f3dd013', '4PC9uWLh1mS4LFl1qvIpFfFUqRfnokWi')
     user_id = fs.get_users_id('bybxbwg@foxmail.com', '2214372851@qq.com')

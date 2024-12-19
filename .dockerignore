@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Python
+*.pyc
+__pycache__
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv
+venv
+env
+
+# IDE
+.vscode
+.idea
+
+# Logs
+*.log
+
+# Docker
+Dockerfile
+.dockerignore
+
+# 其他不需要的文件
+*.md
+*.txt
