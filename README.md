@@ -267,7 +267,7 @@ CORS_ALLOW_HEADERS=*
 | FEISHU_CARD_VERSION | 飞书卡片版本 | 0.0.7 | 否 |
 
 ### 4.7 JWT 配置
-| 环境变量 | 说�� | 默认值 | 必选 |
+| 环境变量 | 说明 | 默认值 | 必选 |
 |---------|------|--------|------|
 | REFRESH_TOKEN_OUT_TIME | 刷新令牌过期时间(秒) | 86400 | 否 |
 | ACCESS_TOKEN_OUT_TIME | 访问令牌过期时间(秒) | 60 | 否 |

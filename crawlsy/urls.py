@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/V1/', include('apps.Spider.urls')),
     path('api/V1/', include('apps.Ide.urls')),
     path('api/V1/', include('apps.Alerts.urls')),
+    path('api/V1/', include('apps.Monitor.urls')),
 ]

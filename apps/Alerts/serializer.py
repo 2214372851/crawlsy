@@ -8,6 +8,7 @@ class AlertSerializer(serializers.ModelSerializer):
     """
     createTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     updateTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    lastTriggerTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
     class Meta:
         model = AlertRuleModel

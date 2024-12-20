@@ -27,7 +27,6 @@ class CustomLoginAuth(BaseAuthentication):
             raise NotAuthenticated(detail='当前用户不存在')
         if user.status != 1:
             raise PermissionDenied(detail='用户不可用')
-        print(user, token)
         return user, token
 
 

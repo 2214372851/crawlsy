@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.Spider",
     "apps.Ide",
     "apps.Alerts",
+    "apps.Monitor",
 ]
 
 MIDDLEWARE = [
