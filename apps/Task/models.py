@@ -20,6 +20,7 @@ class TaskModel(models.Model):
     cronExpression = models.CharField(max_length=100, null=True, blank=True, verbose_name='定时任务cron表达式')
     createTime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    objects = models.Manager()
 
     def delete(self, using=None, keep_parents=False):
         self.taskNodes.clear()

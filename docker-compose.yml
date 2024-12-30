@@ -1,13 +1,18 @@
-version: '3'
-
 services:
-  web:
-    build: .
+  web-frontend:
+    image: seeyounexttime/crawlsy-web:latest
     ports:
-      - "8001:8001"
+      - "80:80"
+    depends_on:
+      - web-backend
+    networks:
+      - crawlsy_network
+
+  web-backend:
+    image: seeyounexttime/crawlsy:latest
     volumes:
       - ./log:/app/log
-      - spider_data:/data
+      - ./data:/data
     environment:
       - SECRET_KEY=your-secret-key
       - TOKEN_ISS=SpiderStudio-ISS@2024
@@ -43,13 +48,15 @@ services:
       - redis
       - mysql
       - mongo
+    networks:
+      - crawlsy_network
 
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
     volumes:
-      - redis_data:/data
+      - ./redis_data:/data
+    networks:
+      - crawlsy_network
 
   mysql:
     image: mysql:8
@@ -59,7 +66,9 @@ services:
       - MYSQL_USER=SpiderManage
       - MYSQL_PASSWORD=your-password
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - crawlsy_network
 
   mongo:
     image: mongo:latest
@@ -67,10 +76,16 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=mongoroot
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo_data:/data/db
+      - ./mongo_data:/data/db
+    networks:
+      - crawlsy_network
 
 volumes:
   spider_data:  # IDE相关的数据
   redis_data:   # Redis数据
   mysql_data:   # MySQL数据
   mongo_data:   # MongoDB数据
+
+networks:
+  crawlsy_network:
+    driver: bridge

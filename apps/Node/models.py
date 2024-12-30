@@ -12,6 +12,7 @@ class NodeModel(models.Model):
     status = models.BooleanField(default=True, verbose_name='节点状态')
     createTime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if self.pk is not None:

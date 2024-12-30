@@ -6,6 +6,7 @@ import redis
 from celery import shared_task
 from django.db.models import Q, Prefetch
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.Alerts.models import AlertRuleModel
 from apps.Node.models import NodeModel
@@ -144,7 +145,7 @@ def node_detection():
                 node.status = new_status  # 更新状态
                 node.save()  # 保存到数据库
                 logger.info(f'节点 {node.name} 状态已更新为: {new_status}')
-        except NodeModel.DoesNotExist:
+        except ObjectDoesNotExist:
             logger.warning(f'节点 {node_uid} 不存在于数据库中')
 
 

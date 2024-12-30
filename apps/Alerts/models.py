@@ -38,6 +38,7 @@ class AlertRuleModel(models.Model):
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
     interval = models.IntegerField(default=60, verbose_name='告警间隔')
     lastTriggerTime = models.DateTimeField(null=True, blank=True, verbose_name='上次触发时间')
+    objects = models.Manager()
 
     class Meta:
         db_table = 'alertRule'

@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.models import UserManager, PermissionManager
 from django.db import models
 from django.utils import timezone
 
@@ -20,6 +21,8 @@ class UserModel(models.Model):
     lastLoginTime = models.DateTimeField(auto_now=True, verbose_name='最后登录时间')
     role = models.ManyToManyField('RoleModel', verbose_name='角色')
     feishu_id = models.CharField(max_length=32, null=True, blank=True, verbose_name='飞书用户ID')
+    is_root = models.BooleanField(default=False, verbose_name='是否管理员')
+    objects = UserManager()
 
     def check_password(self, password):
         return check_password(password, self.password)
@@ -73,6 +76,7 @@ class PermissionModel(models.Model):
     menu = models.ForeignKey('MenuModel', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='菜单')
     createTime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updateTime = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    objects = models.Manager()
 
     class Meta:
         db_table = 'permission'

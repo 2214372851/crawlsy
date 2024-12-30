@@ -25,6 +25,8 @@ class CustomLoginAuth(BaseAuthentication):
         user: UserModel = UserModel.objects.filter(uid=uid).first()
         if not user:
             raise NotAuthenticated(detail='当前用户不存在')
+        if user.is_root:
+            return user, token
         if user.status != 1:
             raise PermissionDenied(detail='用户不可用')
         return user, token
@@ -48,6 +50,8 @@ class CustomPermission(BasePermission):
             return url_name
 
     def has_permission(self, request, view):
+        if request.user.is_root:
+            return True
         request_path = self._get_route_key(request.resolver_match.url_name, request.method)
         prefetch = Prefetch(
             'permissions',
