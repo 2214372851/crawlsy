@@ -13,7 +13,7 @@ class Command(BaseCommand):
         if options['method'] == 'create':
             UserModel.objects.create(
                 username='管理员',
-                password='Admin@123',
+                password=UserModel.make_password('Admin@123'),
                 email='admin@admin.com',
                 is_root=True,
             ).save()
@@ -21,9 +21,9 @@ class Command(BaseCommand):
         elif options['method'] == 'reload':
             user = UserModel.objects.filter(email='admin@admin.com')
             if user.exists():
-                user.first().update(
-                    password='Admin@123',
-                ).save()
+                user.update(
+                    password=UserModel.make_password('Admin@123')
+                )
                 self.stdout.write(self.style.ERROR('密码重置为：Admin@123'))
 
             else:

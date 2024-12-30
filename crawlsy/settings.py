@@ -221,7 +221,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Log
-LOGGING_PATH = BASE_DIR / "log" / "SpiderStudio.log"
+LOGGING_PATH = Path("/var/log/") / "SpiderStudio.log"
 LOGGING_PATH.parent.mkdir(exist_ok=True)
 LOGGING = {
     "version": 1,

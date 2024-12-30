@@ -22,17 +22,10 @@ class LoginView(APIView):
         user: UserModel = UserModel.objects.prefetch_related('role__permissions__menu').get(email=email)
         if not user.check_password(password):
             return CustomResponse(code=Code.INVALID_ARGUMENT, msg='账号或密码错误')
-        if not user.status:
+        if not user.status and not user.is_root:
             return CustomResponse(code=Code.PERMISSION_DENIED, msg='账号已被禁用')
         menus = {}
         permissions = {}
-        prefetch = Prefetch(
-            'permissions',
-            queryset=PermissionModel.objects.select_related('menu', 'menu__parent').all(),
-            to_attr='prefetched_permissions'
-        )
-
-        roles = user.role.prefetch_related(prefetch).all()
 
         def add_menu(item):
             if item.id not in menus:
@@ -46,8 +39,8 @@ class LoginView(APIView):
                 if item.parent:
                     add_menu(item.parent)
 
-        for role in roles:
-            for permission in role.prefetched_permissions:
+        if user.is_root:
+            for permission in PermissionModel.objects.all():
                 menu = permission.menu
                 add_menu(menu)
 
@@ -56,6 +49,26 @@ class LoginView(APIView):
 
                 if permission.method not in permissions[permission.path]:
                     permissions[permission.path].add(permission.method)
+        else:
+            prefetch = Prefetch(
+                'permissions',
+                queryset=PermissionModel.objects.select_related('menu', 'menu__parent').all(),
+                to_attr='prefetched_permissions'
+            )
+
+            roles = user.role.prefetch_related(prefetch).all()
+
+
+            for role in roles:
+                for permission in role.prefetched_permissions:
+                    menu = permission.menu
+                    add_menu(menu)
+
+                    if permission.path not in permissions:
+                        permissions[permission.path] = set()
+
+                    if permission.method not in permissions[permission.path]:
+                        permissions[permission.path].add(permission.method)
 
         for path in permissions:
             permissions[path] = list(permissions[path])

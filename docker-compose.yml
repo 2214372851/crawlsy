@@ -11,29 +11,29 @@ services:
   web-backend:
     image: seeyounexttime/crawlsy:latest
     volumes:
-      - ./log:/app/log
+      - ./log:/var/log
       - ./data:/data
     environment:
       - SECRET_KEY=your-secret-key
       - TOKEN_ISS=SpiderStudio-ISS@2024
       - REFRESH_TOKEN_OUT_TIME=86400
       - ACCESS_TOKEN_OUT_TIME=60
-      - CELERY_BROKER_URL=redis://redis:6379/4
-      - CELERY_RESULT_BACKEND=redis://redis:6379/4
+      - CELERY_BROKER_URL=redis://:CrawlsyRedis@redis:6379/4
+      - CELERY_RESULT_BACKEND=redis://:CrawlsyRedis@redis:6379/4
       - MYSQL_DB_HOST=mysql
       - MYSQL_DB_PORT=3306
       - MYSQL_DB_NAME=SpiderManage
       - MYSQL_DB_USER=SpiderManage
       - MYSQL_DB_PASSWORD=your-password
-      - DEFAULT_REDIS_URL=redis://redis:6379/0
-      - ACCESS_TOKEN_REDIS_URL=redis://redis:6379/1
-      - REFRESH_TOKEN_REDIS_URL=redis://redis:6379/2
-      - NODE_SERVICE_URL=redis://redis:6379/3
+      - DEFAULT_REDIS_URL=redis://:CrawlsyRedis@redis:6379/0
+      - ACCESS_TOKEN_REDIS_URL=redis://:CrawlsyRedis@redis:6379/1
+      - REFRESH_TOKEN_REDIS_URL=redis://:CrawlsyRedis@redis:6379/2
+      - NODE_SERVICE_URL=redis://:CrawlsyRedis@redis:6379/3
       - MONGO_URL=mongodb://mongoroot:password@mongo:27017/
       - MONGO_DB=SpiderManage
       - FEISHU_APP_ID=your-app-id
       - FEISHU_APP_SECRET=your-app-secret
-      - FEISHU_CARD_ID=your-card-id
+      - FEISHU_CARD_ID=AAqjOpHhoYR3F
       - FEISHU_CARD_VERSION=0.0.7
       - DEBUG=false
       - IDE_MAX_FILE_SIZE=10485760
@@ -53,6 +53,10 @@ services:
 
   redis:
     image: redis:latest
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=CrawlsyRedis
     volumes:
       - ./redis_data:/data
     networks:
@@ -72,6 +76,8 @@ services:
 
   mongo:
     image: mongo:latest
+    ports:
+      - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoroot
       - MONGO_INITDB_ROOT_PASSWORD=password
