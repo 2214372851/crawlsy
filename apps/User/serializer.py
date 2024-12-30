@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         many=True, queryset=RoleModel.objects, required=True
     )
     password = serializers.CharField(write_only=True)
-    feishu_id = serializers.CharField(write_only=True)
+    feishu_id = serializers.CharField(write_only=True, required=False, allow_blank=True)
     feishu = serializers.SerializerMethodField(read_only=True)
 
     def get_feishu(self, obj):
