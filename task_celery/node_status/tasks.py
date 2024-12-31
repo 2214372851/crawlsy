@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from apps.Alerts.models import AlertRuleModel
 from apps.Node.models import NodeModel
 from apps.Task.models import TaskModel
-from crawlsy import settings
+from django.conf import settings
 from utils.feishu import FeishuApi
 from utils.node_api import NodeApi
 from utils.node_stat import get_node_conn
@@ -48,19 +48,24 @@ def node_detection():
     # 记录哪些任务受影响的用户
     alert_users = {}
     for node in nodes:
-        for task in node.taskmodel_set.all():
-            feishu_id = task.founder.feishu_id
-            if feishu_id not in alert_users:
-                alert_users[feishu_id] = {}
-            alert_users[feishu_id][str(task.id)] = task.name
-        node.status = False
-        node.save()
-        logger.info(f'节点 {node.name} 已离线')
+        if node.nodeUid not in search_nodes and node.status:
+            for task in node.taskmodel_set.all():
+                feishu_id = task.founder.feishu_id
+                if feishu_id not in alert_users:
+                    alert_users[feishu_id] = {}
+                alert_users[feishu_id][str(task.id)] = task.name
+            node.status = False
+            node.save()
+            logger.info(f'节点 {node.name} 已离线')
+        elif node.nodeUid in search_nodes and not node.status:
+            node.status = True
+            node.save()
+            logger.info(f'节点 {node.name} 已上线')
 
     # 发送通知给每个受影响的用户
     for feishu_id, tasks in alert_users.items():
         task_links = '\n- '.join(
-            f'[{task_name}](http://localhost:5173/task/details?id={task_id})' for task_id, task_name in tasks.items()
+            f'[{task_name}]({settings.FRONT_END_ADDRESS}task/details?id={task_id})' for task_id, task_name in tasks.items()
         )
         message = f"你的任务所在节点已经离线，受影响任务如下：\n- {task_links}"
         feishu_api.send_message(
@@ -68,7 +73,7 @@ def node_detection():
             msg=message,
             severity='critical',
             interval=60,
-            callback_url='http://localhost:5173/',
+            callback_url=f'{settings.FRONT_END_ADDRESS}task',
             card_id=settings.CARD_ID,
             card_version=settings.CARD_VERSION
         )
@@ -117,7 +122,7 @@ def node_detection():
                     msg=msg,
                     severity='warning',
                     interval=rule.interval,
-                    callback_url=f'http://localhost:5173/alert/details?id={rule.id}',
+                    callback_url=f'{settings.FRONT_END_ADDRESS}alert/details?id={rule.id}',
                     card_id=settings.CARD_ID,
                     card_version=settings.CARD_VERSION
                 )
@@ -128,7 +133,7 @@ def node_detection():
                     msg=msg,
                     severity='warning',
                     interval=rule.interval,
-                    callback_url=f'http://localhost:5173/alert/details?id={rule.id}',
+                    callback_url=f'{settings.FRONT_END_ADDRESS}alert/details?id={rule.id}',
                     card_id=settings.CARD_ID,
                     card_version=settings.CARD_VERSION
                 )
@@ -160,7 +165,7 @@ def task_start(task_uid: str):
             msg=f'任务 {task.name} 不存在，无法启动',
             severity='critical',
             interval=60,
-            callback_url='http://localhost:5173/',
+            callback_url=settings.FRONT_END_ADDRESS,
             card_id=settings.CARD_ID,
             card_version=settings.CARD_VERSION
         )
@@ -174,7 +179,7 @@ def task_start(task_uid: str):
             msg=f'任务 {task.name} 无任务部署节点',
             severity='critical',
             interval=60,
-            callback_url='http://localhost:5173/',
+            callback_url=f"{settings.FRONT_END_ADDRESS}/task/details?id={task.pk}",
             card_id=settings.CARD_ID,
             card_version=settings.CARD_VERSION
         )
@@ -188,7 +193,7 @@ def task_start(task_uid: str):
             msg=f'任务 {task.name} 未配置启动命令',
             severity='critical',
             interval=60,
-            callback_url='http://localhost:5173/',
+            callback_url=f"{settings.FRONT_END_ADDRESS}/task/details?id={task.pk}",
             card_id=settings.CARD_ID,
             card_version=settings.CARD_VERSION
         )
@@ -210,7 +215,7 @@ def task_start(task_uid: str):
                         msg=f'任务 {task.name} 启动失败\n错误信息如下\n{message}',
                         severity='critical',
                         interval=60,
-                        callback_url='http://localhost:5173/',
+                        callback_url=f"{settings.FRONT_END_ADDRESS}/task/details?id={task.pk}",
                         card_id=settings.CARD_ID,
                         card_version=settings.CARD_VERSION
                     )
@@ -223,7 +228,7 @@ def task_start(task_uid: str):
                 msg=f'任务 {task.name} 启动失败\n错误信息如下\n{e}',
                 severity='critical',
                 interval=60,
-                callback_url='http://localhost:5173/',
+                callback_url=f"{settings.FRONT_END_ADDRESS}/task/details?id={task.pk}",
                 card_id=settings.CARD_ID,
                 card_version=settings.CARD_VERSION
             )

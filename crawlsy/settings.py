@@ -301,3 +301,6 @@ APP_ID = os.getenv("FEISHU_APP_ID")
 APP_SECRET = os.getenv("FEISHU_APP_SECRET")
 CARD_ID = os.getenv("FEISHU_CARD_ID")
 CARD_VERSION = os.getenv("FEISHU_CARD_VERSION")
+
+# Callback
+FRONT_END_ADDRESS = os.getenv("FRONT_END_ADDRESS")
