@@ -47,6 +47,7 @@ def node_detection():
 
     # 记录哪些任务受影响的用户
     alert_users = {}
+    node_name_map = {}
     for node in nodes:
         if node.nodeUid not in search_nodes and node.status:
             for task in node.taskmodel_set.all():
@@ -61,6 +62,7 @@ def node_detection():
             node.status = True
             node.save()
             logger.info(f'节点 {node.name} 已上线')
+        node_name_map[str(node.nodeUid)] = node.name
 
     # 发送通知给每个受影响的用户
     for feishu_id, tasks in alert_users.items():
@@ -91,23 +93,23 @@ def node_detection():
             num1 = node_stat.get(rule.mertric)
             if num1 is None:
                 continue
-
+            node_name = node_name_map[node_stat['node_uid']]
             num2 = rule.threshold
             if rule.condition == '>=' and num1 >= num2:
                 rule_msg.append(
-                    f'\n- {node_stat["node_name"]} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
+                    f'\n- {node_name} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
             elif rule.condition == '<=' and num1 <= num2:
                 rule_msg.append(
-                    f'\n- {node_stat["node_name"]} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
+                    f'\n- {node_name} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
             elif rule.condition == '>' and num1 > num2:
                 rule_msg.append(
-                    f'\n- {node_stat["node_name"]} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
+                    f'\n- {node_name} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
             elif rule.condition == '<' and num1 < num2:
                 rule_msg.append(
-                    f'\n- {node_stat["node_name"]} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
+                    f'\n- {node_name} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
             elif rule.condition == '=' and num1 == num2:
                 rule_msg.append(
-                    f'\n- {node_stat["node_name"]} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
+                    f'\n- {node_name} 节点触发阈值 {rule.mertric} [{num1} {rule.condition} {num2}] 当前值为: {num1}')
         if len(rule_msg) > 1:
             rule_users = [user.feishu_id for user in rule.target.all() if user.feishu_id]
             rule.lastTriggerTime = now
