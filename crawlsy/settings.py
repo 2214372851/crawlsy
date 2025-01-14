@@ -221,7 +221,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Log
-LOGGING_PATH = Path("/var/log/") / "SpiderStudio.log"
+# LOGGING_PATH = Path("/var/log/") / "SpiderStudio.log"
+LOGGING_PATH = Path("SpiderStudio.log")
 LOGGING_PATH.parent.mkdir(exist_ok=True)
 LOGGING = {
     "version": 1,
@@ -294,9 +295,6 @@ NODE_SERVICE_URL = os.getenv("NODE_SERVICE_URL")
 MONGO_URL = os.getenv("MONGO_URL")
 MONGO_DB = os.getenv("MONGO_DB")
 
-# 飞书webhook
-# 应用需要开头以下权限 im:message:send_as_bot,im:message,contact:user.employee_id:readonly,contact:user.id:readonly
-# 消息推送卡片配置 https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/send-feishu-cards-with-app-bots
 APP_ID = os.getenv("FEISHU_APP_ID")
 APP_SECRET = os.getenv("FEISHU_APP_SECRET")
 CARD_ID = os.getenv("FEISHU_CARD_ID")

@@ -274,6 +274,11 @@ gRPC 将采集到的数据直接写入 MongoDB，同时任务状态通过 Celery
 
 ### 4.6 飞书配置
 
+> 应用需要开头以下权限 `im:message:send_as_bot,im:message,contact:user.employee_id:readonly,contact:user.id:readonly`
+> 
+> 消息推送卡片配置 https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/send-feishu-cards-with-app-bots
+
+
 | 环境变量                | 说明      | 默认值   | 必选 |
 |---------------------|---------|-------|----|
 | FEISHU_APP_ID       | 飞书应用 ID | -     | 否  |
