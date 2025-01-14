@@ -23,7 +23,7 @@ RUN rm -f /app/.env
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN poetry install
+RUN poetry install --no-root
 
 EXPOSE 8001
 
