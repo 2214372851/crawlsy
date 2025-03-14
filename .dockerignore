@@ -25,5 +25,4 @@ Dockerfile
 .dockerignore
 
 # 其他不需要的文件
-*.md
 *.txt

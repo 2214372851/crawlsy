@@ -2,8 +2,7 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    supervisor \
+RUN apt-get update && apt-get \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/log && \
@@ -16,7 +15,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV TZ=Asia/Shanghai
 
-RUN pip install poetry -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install poetry uvicorn -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 COPY . /app/
 RUN rm -f /app/.env
@@ -27,4 +26,4 @@ RUN poetry install --no-root
 
 EXPOSE 8001
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["uvicorn", "crawlsy.asgi:application", "--host", "0.0.0.0", "--port", "8001", "--workers", "4"]
